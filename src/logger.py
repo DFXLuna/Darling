@@ -4,15 +4,12 @@ class Logger:
 
     def __init__(self, useStdOut):
         self.useStdOut = useStdOut
+        self.file = None
 
         if not self.useStdOut:
-            dt = datetime.now()
-            dtString = f'[{dt.date.day}-{dt.date.month}-T{dt.time.hour},{dt.time.minute},{dt.time.second}]LOG.txt'
+            dt = datetime.datetime.now()
+            dtString = f'[{dt.day}-{dt.month}-T{dt.hour},{dt.minute},{dt.second}]LOG.txt'
             self.file = open(dtString, 'a')
-
-    def __del__(self):
-        if not self.useStdOut:
-            self.file.close()
 
     def Log(self, message):
         ts = datetime.datetime.now()

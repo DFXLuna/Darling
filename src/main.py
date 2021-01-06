@@ -6,7 +6,7 @@ import os
 from discord.ext import commands
 bot = commands.Bot(command_prefix="$")
 reg = r.Registration()
-log = l.Logger(True)
+log = l.Logger(False)
 
 @bot.event
 async def on_ready():
@@ -49,5 +49,8 @@ async def check_registration(ctx):
         await ctx.send(e.args)
     return
 
+# @bot.command()
+# async def flush(ctx):
+#     reg.Flush()
 
 bot.run(os.getenv('BOT_TOKEN'))
