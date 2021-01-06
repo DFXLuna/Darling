@@ -1,6 +1,7 @@
 import discord
 import registration as r
 import datetime
+import os
 
 from discord.ext import commands
 bot = commands.Bot(command_prefix="$")
@@ -53,4 +54,4 @@ async def check_registration(ctx):
     return
 
 
-bot.run('')
+bot.run(os.getenv('BOT_TOKEN'))
