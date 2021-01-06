@@ -53,4 +53,4 @@ async def check_registration(ctx):
     return
 
 
-bot.run('Nzk2MTcyMzU0NjMwOTc1NTA4.X_UDSQ.RpeAXQFjbt6J1uAuN2-4gRRJLko')
+bot.run('')
