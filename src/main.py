@@ -1,7 +1,6 @@
 import discord
 import registration as r
 import logger as l
-import datetime
 import os
 
 from discord.ext import commands
