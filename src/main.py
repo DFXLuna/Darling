@@ -6,10 +6,11 @@ import os
 from discord.ext import commands
 bot = commands.Bot(command_prefix="$")
 reg = r.Registration()
-log = l.Logger(False)
+log = l.Logger(useStdOut=False)
 
 @bot.event
 async def on_ready():
+    log.LogToConsole("Started")
     log.Log(f'Logged in as {bot.user.name}')
 
 @bot.command()

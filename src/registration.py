@@ -17,7 +17,7 @@ class Registration:
     
     def Flush(self):
         dt = datetime.datetime.now()
-        dtString = f'[{dt.day}-{dt.month}-T{dt.hour},{dt.minute},{dt.second}]db.csv'
+        dtString = f'[{dt.month}-{dt.day}-T{dt.hour},{dt.minute},{dt.second}]db.csv'
         with open(dtString, 'w') as f:
             for k,v in self.entries.items():
                 f.write(f'{k}, {v}\n')
