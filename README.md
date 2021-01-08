@@ -11,5 +11,4 @@
 
 
 ## TODO: 
-- Put registration bot commands in a cog
 - Add problem submission commands
