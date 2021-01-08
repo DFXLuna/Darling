@@ -3,7 +3,7 @@ import logger
 import csv
 import os.path
 
-class Registration:
+class RegistrationDatabase:
     
     def __init__(self, dbfile, logger):
         self.entries = {}
