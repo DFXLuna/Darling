@@ -2,6 +2,7 @@ import discord
 import registrationDatabase as r
 import logger as l
 import registrationCog
+import submissionCog
 import os
 
 from discord.ext import commands
@@ -9,9 +10,6 @@ bot = commands.Bot(command_prefix="$")
 log = l.Logger(useStdOut=True)
 dbFilename = "db.csv"
 reg = r.RegistrationDatabase(dbFilename, log)
-
-def KeyFromAuthor(ctxAuthor):
-    return ctxAuthor.name + '#' + ctxAuthor.discriminator
 
 @bot.event
 async def on_ready():
@@ -28,6 +26,7 @@ if token == None:
     log.LogToConsole("BOT_TOKEN environment variable not found")
 else:
     bot.add_cog(registrationCog.RegistrationCog(bot, log, reg))
+    bot.add_cog(submissionCog.SubmissionCog(bot, log, reg))
     bot.run(token)
 
 reg.Flush()
