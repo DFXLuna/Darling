@@ -12,3 +12,5 @@
 
 ## TODO: 
 - Add problem submission commands
+  - Backup, send to judges
+  - Primary, autograde
