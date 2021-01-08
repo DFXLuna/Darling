@@ -1,6 +1,7 @@
 import discord
 import registrationDatabase as r
 import logger as l
+import keyUtil
 from discord.ext import commands
 
 class RegistrationCog(commands.Cog):
@@ -9,22 +10,19 @@ class RegistrationCog(commands.Cog):
         self.logger = logger
         self.registrationDb = registrationDb
 
-    def KeyFromAuthor(self, ctxAuthor):
-        return ctxAuthor.name + '#' + ctxAuthor.discriminator
-
     @commands.command()
     async def register(self, ctx, teamNumber: int):
-        "Register yourself to a team, removes any other registration"
+        "Register yourself to a single team, removes any other registrations. Syntax: `$register <teamNumber>`"
         if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
             try:
-                self.logger.Log(f'register {ctx.author}')
+                self.logger.Log(f'register {ctx.author} {teamNumber}')
                 
-                val = self.registrationDb.GetEntry(self.KeyFromAuthor(ctx.author))
-                if val is not None:
-                    await ctx.send(f'{ctx.author} is already registered to {val}. Replacing that registration with {teamNumber}')
+                currentTeamNumber = self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
+                if currentTeamNumber is not None:
+                    await ctx.send(f'{ctx.author} is already registered to #{currentTeamNumber}. Replacing that registration with #{teamNumber}')
 
-                self.registrationDb.Register(self.KeyFromAuthor(ctx.author), teamNumber)
-                await ctx.send(f'Registered {ctx.author}')
+                self.registrationDb.Register(keyUtil.KeyFromAuthor(ctx.author), teamNumber)
+                await ctx.send(f'Registered {ctx.author} to team #{teamNumber}')
             except Exception as e:
                 await ctx.send('USAGE: $register [teamNumber]\ne.g. $register 1234')
                 await ctx.send(e.args)
@@ -34,11 +32,11 @@ class RegistrationCog(commands.Cog):
 
     @commands.command()
     async def unregister(self, ctx):
-        "Remove your registration from a team"
+        "Remove your registration from all teams."
         if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
             try:
-                self.registrationDb.Unregister(self.KeyFromAuthor(ctx.author))
-                self.logger.Log(f'unregister {ctx.author}')
+                self.registrationDb.Unregister(keyUtil.KeyFromAuthor(ctx.author))
+                self.logger.Log(f'unregister {ctx.author} from all teams')
                 await ctx.send(f'unregistered {ctx.author}')
             except Exception as e:
                 await ctx.send(e.args)
@@ -48,13 +46,13 @@ class RegistrationCog(commands.Cog):
 
     @commands.command()
     async def check_registration(self, ctx):
-        "Check which team you are registered to"
+        "Check which team you are registered to."
         if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
             self.logger.Log(f'check_registration {ctx.author}')
             try:
-                val = self.registrationDb.GetEntry(self.KeyFromAuthor(ctx.author))
-                if val is not None:
-                    await ctx.send(f'{ctx.author} is registered to {val}')
+                teamNumber = self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
+                if teamNumber is not None:
+                    await ctx.send(f'{ctx.author} is registered to #{teamNumber}')
                 else:
                     await ctx.send(f'{ctx.author} is not registered')
             except Exception as e:
