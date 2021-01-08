@@ -1,23 +1,41 @@
 import datetime
+import logger
+import csv
+import os.path
 
 class Registration:
     
-    def __init__(self):
+    def __init__(self, dbfile, logger):
         self.entries = {}
+        self.dbfile = dbfile
+        self.logger = logger
+
+        if os.path.isfile(dbfile):
+            self.logger.Log("Loading registration from " + dbfile)
+            with open(dbfile, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    self.entries[row['user']] = row['team']
+            self.logger.Log("Registration loaded")
+        else:
+            self.logger.Log("Did not load registration")
 
     def GetEntry(self, key):
         return self.entries.get(key)
 
     def Register(self, name, teamNumber):
         self.entries[name] = teamNumber
-    
+
     def Unregister(self, name):
-        if name in self.entries:
-            self.entries.pop(name)
-    
+        self.entries.pop(name)
+
     def Flush(self):
-        dt = datetime.datetime.now()
-        dtString = f'[{dt.month}-{dt.day}-T{dt.hour},{dt.minute},{dt.second}]db.csv'
-        with open(dtString, 'w') as f:
+        self.logger.Log("Flushing registration to disk")
+        with open(self.dbfile, 'w') as f:
+            fieldnames = ['user', 'team']
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+
             for k,v in self.entries.items():
-                f.write(f'{k}, {v}\n')
+                writer.writerow( {'user': k, 'team': v} )
+        self.logger.Log("Finished flushing")
