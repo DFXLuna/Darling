@@ -14,9 +14,11 @@ class Registration:
             self.logger.Log("Loading registration from " + dbfile)
             with open(dbfile, 'r') as f:
                 reader = csv.DictReader(f)
+                entriesLoaded = 0
                 for row in reader:
                     self.entries[row['user']] = row['team']
-            self.logger.Log("Registration loaded")
+                    entriesLoaded += 1
+            self.logger.Log(f"Loaded {entriesLoaded} registration entries")
         else:
             self.logger.Log("Did not load registration")
 
