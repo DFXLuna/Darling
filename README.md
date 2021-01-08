@@ -8,3 +8,8 @@
 ## To run
   - Install requirements with pip
   - Run src/main.py
+
+
+## TODO: 
+- Put registration bot commands in a cog
+- Add problem submission commands
