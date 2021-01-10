@@ -8,7 +8,8 @@ import os
 from discord.ext import commands
 bot = commands.Bot(command_prefix="$")
 log = l.Logger(useStdOut=True)
-dbFilename = "db.csv"
+
+registrationDbFilename = "RegistrationDb.csv"
 reg = r.RegistrationDatabase(dbFilename, log)
 
 @bot.event
