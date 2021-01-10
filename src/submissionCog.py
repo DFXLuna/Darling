@@ -22,5 +22,10 @@ class SubmissionCog(commands.Cog):
                 await ctx.send(f'No attachment found, please attach your submission files to the command message. Multiple files may be submitted as a zip archive.')
                 return
             await ctx.send(f'Submission of problem {problemNumber} for team #{teamNumber} received, processing...')
+
+            ## REMOVE
+            for attachment in ctx.message.attachments:
+                await ctx.send(f'Attachment details:\nID {attachment.id}\nSize: {attachment.size}\nFilename: {attachment.filename}\nURL: {attachment.url}')
+            # END REMOVE
         else:
             await ctx.send(f'You must direct message CodeWarsBot to use that command')
