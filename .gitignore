@@ -1,5 +1,6 @@
 
-db.csv
+RegistrationDb.csv
+SubmissionDb.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

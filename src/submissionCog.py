@@ -3,10 +3,11 @@ import keyUtil
 from discord.ext import commands
 
 class SubmissionCog(commands.Cog):
-    def __init__(self, bot, logger, registrationDb):
+    def __init__(self, bot, logger, registrationDb, submissionDb):
         self.bot = bot
         self.logger = logger
         self.registrationDb = registrationDb
+        self.submissionDb = submissionDb
 
     @commands.command()
     async def submit(self, ctx, problemNumber: int):
@@ -22,5 +23,10 @@ class SubmissionCog(commands.Cog):
                 await ctx.send(f'No attachment found, please attach your submission files to the command message. Multiple files may be submitted as a zip archive.')
                 return
             await ctx.send(f'Submission of problem {problemNumber} for team #{teamNumber} received. It has been forwarded to the judges for grading.')
+            
+            self.submissionDb.AddSubmission(keyUtil.KeyFromAuthor(ctx.author), teamNumber, problemNumber, ctx.message.attachments[0].url)
+            
+            for attachment in ctx.message.attachments:
+                await ctx.send(f'Attachment details:\nID {attachment.id}\nSize: {attachment.size}\nFilename: {attachment.filename}\nURL: {attachment.url}')
         else:
-            await ctx.send(f'You must direct message CodeWarsBot to use that command')
+            await ctx.send(f'You must direct message CodeWarsBot to use that command') 
