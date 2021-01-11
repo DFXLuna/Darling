@@ -1,20 +1,26 @@
-import uuid
+import uuid as u
 
 class Submission:
-    def __init__(self, submitter, teamNumber, problemNumber, filePath):
+    def __init__(self, submitter, teamNumber, problemNumber, url, uuid=None):
         self.submitter = submitter
         self.teamNumber = teamNumber
-        self.filePath = filePath
-        self.uuid = uuid.uuid4()
+        self.url = url
+        if uuid is None:
+            self.uuid = u.uuid4()
+        else:
+            self.uuid = uuid
 
-    def GetSubmitter():
+    def GetSubmitter(self):
         return self.submitter
 
-    def GetTeamNumber():
+    def GetTeamNumber(self):
         return self.teamNumber
 
-    def GetProblemNumber():
+    def GetProblemNumber(self):
         return self.problemNumber
 
-    def GetFilePath():
-        
+    def GetUrl(self):
+        return self.url
+
+    def GetUuid(self):
+        return self.uuid
