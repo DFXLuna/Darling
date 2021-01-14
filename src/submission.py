@@ -4,6 +4,7 @@ class Submission:
     def __init__(self, submitter, teamNumber, problemNumber, url, uuid=None):
         self.submitter = submitter
         self.teamNumber = teamNumber
+        self.problemNumber = problemNumber
         self.url = url
         if uuid is None:
             self.uuid = u.uuid4()

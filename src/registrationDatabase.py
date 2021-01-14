@@ -2,6 +2,7 @@ import datetime
 import logger
 import csv
 import os.path
+import asyncio
 
 class RegistrationDatabase:
     
@@ -9,6 +10,7 @@ class RegistrationDatabase:
         self.entries = {}
         self.dbfile = dbfile
         self.logger = logger
+        self.mutex = asyncio.Lock()
 
         if os.path.isfile(dbfile):
             self.logger.Log("Loading registration from " + dbfile)
@@ -22,14 +24,17 @@ class RegistrationDatabase:
         else:
             self.logger.Log("Did not load registration")
 
-    def GetEntry(self, key):
-        return self.entries.get(key)
+    async def GetEntry(self, key):
+        async with self.mutex:
+            return self.entries.get(key)
 
-    def Register(self, name, teamNumber):
-        self.entries[name] = teamNumber
+    async def Register(self, name, teamNumber):
+        async with self.mutex:
+            self.entries[name] = teamNumber
 
-    def Unregister(self, name):
-        self.entries.pop(name)
+    async def Unregister(self, name):
+        async with self.mutex:
+            self.entries.pop(name)
 
     def Flush(self):
         self.logger.Log("Flushing registration to disk")
