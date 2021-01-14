@@ -1,5 +1,6 @@
 import discord
 import keyUtil
+import roleUtil
 from discord.ext import commands
 
 class SubmissionCog(commands.Cog):
@@ -15,7 +16,7 @@ class SubmissionCog(commands.Cog):
         if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
             self.logger.Log(f'submit {ctx.author} {problemNumber}')
             
-            teamNumber = self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
+            teamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
             if teamNumber is None:
                 await ctx.send(f'{ctx.author} is not registered to a team. Please use the `$register <teamNumber>` command to register yourself to your team.')
                 return
@@ -24,9 +25,26 @@ class SubmissionCog(commands.Cog):
                 return
             await ctx.send(f'Submission of problem {problemNumber} for team #{teamNumber} received. It has been forwarded to the judges for grading.')
             
-            self.submissionDb.AddSubmission(keyUtil.KeyFromAuthor(ctx.author), teamNumber, problemNumber, ctx.message.attachments[0].url)
+            await self.submissionDb.AddSubmission(keyUtil.KeyFromAuthor(ctx.author), teamNumber, problemNumber, ctx.message.attachments[0].url)
             
             for attachment in ctx.message.attachments:
                 await ctx.send(f'Attachment details:\nID {attachment.id}\nSize: {attachment.size}\nFilename: {attachment.filename}\nURL: {attachment.url}')
         else:
-            await ctx.send(f'You must direct message CodeWarsBot to use that command') 
+            await ctx.send(f'You must direct message CodeWarsBot to use that command')
+
+    @commands.command()
+    async def list_submission(self, ctx):
+        'Lists all submissions currently in the database'
+        if not roleUtil.IsJudge(ctx.author.roles):
+            await ctx.send("You do not have permission to use this command")
+            return
+        if ctx.channel.name is not 'judge-grading':
+            await ctx.send("You must use this command in the `judge-grading` channel")
+            return
+
+        entries = await self.submissionDb.GetAllSubmissions()
+        displayString = ''
+        for entry in entries:
+            displayString += f'>Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}\n\n'
+
+        await ctx.send(displayString)

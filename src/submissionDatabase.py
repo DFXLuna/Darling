@@ -3,6 +3,7 @@ import logger
 import csv
 import submission as s
 import os.path
+import asyncio
 
 class submissionDatabase:
     
@@ -12,6 +13,7 @@ class submissionDatabase:
         self.entries = {}
         self.dbfile = dbfile
         self.logger = logger
+        self.mutex = asyncio.Lock()
 
         if os.path.isfile(dbfile):
             self.logger.Log("Loading submission db from " + dbfile)
@@ -26,14 +28,21 @@ class submissionDatabase:
         else:
             self.logger.Log("Did not load submission db")
 
-    def GetSubmission(self, key):
-        self.logger.Log(f"GetSubmission {key}")
-        return self.entries.get(key)
+    async def GetSubmission(self, key):
+        async with self.mutex:
+            self.logger.Log(f"GetSubmission {key}")
+            return self.entries.get(key)
 
-    def AddSubmission(self, submitter, teamNumber, problemNumber, url):
-        toAdd = s.Submission(submitter, teamNumber, problemNumber, url)
-        self.entries[toAdd.uuid] = toAdd
-        self.logger.Log(f"AddSubmission {toAdd.GetUuid()}, {submitter}, {teamNumber}, {problemNumber}")
+    async def GetAllSubmissions(self):
+        async with self.mutex:
+            self.logger.Log(f"GetAllSubmissions")
+            return List(self.entries.values())
+
+    async def AddSubmission(self, submitter, teamNumber, problemNumber, url):
+        async with self.mutex:
+            toAdd = s.Submission(submitter, teamNumber, problemNumber, url)
+            self.entries[toAdd.uuid] = toAdd
+            self.logger.Log(f"AddSubmission {toAdd.GetUuid()}, {submitter}, {teamNumber}, {problemNumber}")
 
     def Flush(self):
         self.logger.Log("Flushing submissiond db to disk")
@@ -44,7 +53,7 @@ class submissionDatabase:
 
             for k, v in self.entries.items():
                 writer.writerow( {'uuid': k, 'submitter': v.GetSubmitter(), 
-                                 'teamNumber': v.GetTeamNumber(), 'problemNumber': v.GetProblemNumber(),
-                                 'url': v.GetUrl() } )
+                                'teamNumber': v.GetTeamNumber(), 'problemNumber': v.GetProblemNumber(),
+                                'url': v.GetUrl() } )
         self.logger.Log("Finished flushing")
 
