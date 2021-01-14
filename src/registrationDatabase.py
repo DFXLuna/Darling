@@ -18,7 +18,7 @@ class RegistrationDatabase:
                 reader = csv.DictReader(f)
                 entriesLoaded = 0
                 for row in reader:
-                    self.entries[row['user']] = row['team']
+                    self.entries[row['user']] = int(row['team'])
                     entriesLoaded += 1
             self.logger.Log(f"Loaded {entriesLoaded} registration entries")
         else:
