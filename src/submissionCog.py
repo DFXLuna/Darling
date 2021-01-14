@@ -16,13 +16,21 @@ class SubmissionCog(commands.Cog):
         if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
             self.logger.Log(f'submit {ctx.author} {problemNumber}')
             
-            teamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
+            submitter = keyUtil.KeyFromAuthor(ctx.author)
+            teamNumber = await self.registrationDb.GetEntry(submitter)
+            
             if teamNumber is None:
-                await ctx.send(f'{ctx.author} is not registered to a team. Please use the `$register <teamNumber>` command to register yourself to your team.')
+                await ctx.send(f'{submitter} is not registered to a team. Please use the `$register <teamNumber>` command to register yourself to your team.')
                 return
+            
             if len(ctx.message.attachments) == 0:
                 await ctx.send(f'No attachment found, please attach your submission files to the command message. Multiple files may be submitted as a zip archive.')
                 return
+            
+            if await self.submissionDb.SubmissionAlreadyInProgress(teamNumber, problemNumber):
+                await ctx.send(f'team #{teamNumber} has already submitted problem {problemNumber}. Please wait for the judges to judge your submission.')
+                return
+
             await ctx.send(f'Submission of problem {problemNumber} for team #{teamNumber} received. It has been forwarded to the judges for grading.')
             
             await self.submissionDb.AddSubmission(keyUtil.KeyFromAuthor(ctx.author), teamNumber, problemNumber, ctx.message.attachments[0].url)
@@ -45,6 +53,6 @@ class SubmissionCog(commands.Cog):
         entries = await self.submissionDb.GetAllSubmissions()
         displayString = ''
         for entry in entries:
-            displayString += f'> Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}\n\n'
+            displayString += f'> Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}, status: {entry.GetGradeStatus()}\n'
 
         await ctx.send(displayString)

@@ -8,8 +8,6 @@ import asyncio
 class submissionDatabase:
     
     def __init__(self, dbfile, logger):
-        # TODO:
-        #  - Check for existing db
         self.entries = {}
         self.dbfile = dbfile
         self.logger = logger
@@ -21,8 +19,8 @@ class submissionDatabase:
                 reader = csv.DictReader(f)
                 entriesLoaded = 0
                 for row in reader:
-                    self.entries[row['uuid']] = s.Submission(row['submitter'], row['teamNumber'],
-                                                row['problemNumber'], row['url'], row['uuid'])
+                    self.entries[row['uuid']] = s.Submission(row['submitter'], int(row['teamNumber']),
+                                                int(row['problemNumber']), row['url'], row['gradeStatus'], row['uuid'])
                     entriesLoaded += 1
             self.logger.Log(f"Loaded {entriesLoaded} submission entries")
         else:
@@ -44,16 +42,24 @@ class submissionDatabase:
             self.entries[toAdd.uuid] = toAdd
             self.logger.Log(f"AddSubmission {toAdd.GetUuid()}, {submitter}, {teamNumber}, {problemNumber}")
 
+    async def SubmissionAlreadyInProgress(self, teamNumber, problemNumber):
+        async with self.mutex:
+            self.logger.Log(f"SubmissionAlreadyInProgress {teamNumber}, {problemNumber}")
+            for submission in self.entries.values():
+                if submission.GetTeamNumber() == teamNumber and submission.GetProblemNumber() == problemNumber and submission.GetGradeStatus() == 'ungraded':
+                    return True
+            return False
+
     def Flush(self):
-        self.logger.Log("Flushing submissiond db to disk")
+        self.logger.Log("Flushing submission db to disk")
         with open(self.dbfile, 'w') as f:
-            fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'url']
+            fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'url', 'gradeStatus']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
 
             for k, v in self.entries.items():
                 writer.writerow( {'uuid': k, 'submitter': v.GetSubmitter(), 
                                 'teamNumber': v.GetTeamNumber(), 'problemNumber': v.GetProblemNumber(),
-                                'url': v.GetUrl() } )
+                                'url': v.GetUrl(), 'gradeStatus': v.GetGradeStatus() } )
         self.logger.Log("Finished flushing")
 
