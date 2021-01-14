@@ -36,7 +36,7 @@ class submissionDatabase:
     async def GetAllSubmissions(self):
         async with self.mutex:
             self.logger.Log(f"GetAllSubmissions")
-            return List(self.entries.values())
+            return list(self.entries.values())
 
     async def AddSubmission(self, submitter, teamNumber, problemNumber, url):
         async with self.mutex:

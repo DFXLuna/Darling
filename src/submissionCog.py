@@ -33,18 +33,18 @@ class SubmissionCog(commands.Cog):
             await ctx.send(f'You must direct message CodeWarsBot to use that command')
 
     @commands.command()
-    async def list_submission(self, ctx):
+    async def list_submissions(self, ctx):
         'Lists all submissions currently in the database'
         if not roleUtil.IsJudge(ctx.author.roles):
-            await ctx.send("You do not have permission to use this command")
+            await ctx.send('You do not have permission to use this command')
             return
-        if ctx.channel.name is not 'judge-grading':
-            await ctx.send("You must use this command in the `judge-grading` channel")
+        if ctx.channel.name != 'judge-grading':
+            await ctx.send(f'You must use this command in the `judge-grading` channel. This channel is `{ctx.channel.name}`')
             return
 
         entries = await self.submissionDb.GetAllSubmissions()
         displayString = ''
         for entry in entries:
-            displayString += f'>Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}\n\n'
+            displayString += f'> Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}\n\n'
 
         await ctx.send(displayString)

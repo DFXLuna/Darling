@@ -1,5 +1,5 @@
 def IsJudge(ctxRoles):
     for role in ctxRoles:
-        if ctxRoles.name == "Judge" or ctxRoles.name == "Volunteer" or ctxRoles.name == "Admin":
+        if role.name == "Judge" or role.name == "Volunteer" or role.name == "Admin":
             return True
     return false
