@@ -5,6 +5,7 @@ import logger as l
 import registrationCog
 import submissionCog
 import adminCog
+import gradingCog
 import os
 import sys
 import asyncio
@@ -32,6 +33,7 @@ else:
     
     bot.add_cog(registrationCog.RegistrationCog(bot, log, reg))
     bot.add_cog(submissionCog.SubmissionCog(bot, log, reg, sub))
+    bot.add_cog(gradingCog.GradingCog(sub, bot, log))
     #bot.add_cog(adminCog.AdminCog())
     try:
         bot.run(token)

@@ -12,6 +12,7 @@ class submissionDatabase:
         self.dbfile = dbfile
         self.logger = logger
         self.mutex = asyncio.Lock()
+        self.callbacks = []
 
         if os.path.isfile(dbfile):
             self.logger.Log("Loading submission db from " + dbfile)
@@ -41,6 +42,13 @@ class submissionDatabase:
             toAdd = s.Submission(submitter, teamNumber, problemNumber, url)
             self.entries[toAdd.uuid] = toAdd
             self.logger.Log(f"AddSubmission {toAdd.GetUuid()}, {submitter}, {teamNumber}, {problemNumber}")
+            await self.AddSubmissionCallbacks(toAdd)
+            
+    async def AddSubmissionCallbacks(self, submission):
+        preparedFunctions = []
+        for callback in self.callbacks:
+            preparedFunctions.append(callback(submission))
+        await asyncio.gather(*preparedFunctions)
 
     async def SubmissionAlreadyInProgress(self, teamNumber, problemNumber):
         async with self.mutex:
@@ -50,10 +58,13 @@ class submissionDatabase:
                     return True
             return False
 
+    async def RegisterAddSubmissionCallback(self, callback):
+        self.callbacks.append(callback)
+
     def Flush(self):
         self.logger.Log("Flushing submission db to disk")
         with open(self.dbfile, 'w') as f:
-            fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'url', 'gradeStatus']
+            fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'gradeStatus', 'url']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
 
