@@ -12,10 +12,8 @@
 ## TODO(priority order): 
 - Add problem submission commands
   - Backup, send to judges
-    - Figure out how to represent and claim submissions
       - Seperate claiming and judging
-        - Post submission to judge channel, emoji reaction to claim
-        - On claim, DM judge with details. Judge can now run pass or fail commands with failure reason
+      - list_ungraded_submissions
   - Primary, autograde
   - Event start time
   - Remote client failsafe
