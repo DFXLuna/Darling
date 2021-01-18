@@ -76,16 +76,16 @@ class submissionDatabase:
 
     async def NumUngradedEntries(self):
         self.logger.Log('NumUngradedEntries')
-        return len(self.GetUngradedSubmissionUuids())
+        return len(await self.GetUngradedSubmissionUuids())
 
     async def GetUngradedSubmissionUuids(self):
         uuids = []
         self.logger.Log('GetUngradedSubmissionUuids')
         async with self.mutex:
-            for k, v in self.entries:
-                if not v.IsGraded():
-                    uuids.append(v.GetUuid())
-            return count
+            for entry in self.entries.values():
+                if not entry.IsGraded():
+                    uuids.append(entry.GetUuid())
+            return uuids
 
 
 

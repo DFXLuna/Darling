@@ -16,4 +16,5 @@
       - list_ungraded_submissions
   - Primary, autograde
   - Event start time
+    - Could use cog loading and unload to facilitate this
   - Remote client failsafe

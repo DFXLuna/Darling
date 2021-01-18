@@ -21,14 +21,14 @@ class GradingCog(commands.Cog):
         
         await self.submissionDb.RegisterAddSubmissionCallback(self.OnAddSubmission)
         if await self.submissionDb.NumUngradedEntries() > 0:
-            self.logger.Log(f'Loading {self.submissionDb.NumUngradedEntries()} ungraded entries')
+            self.logger.Log(f'Loading {await self.submissionDb.NumUngradedEntries()} ungraded entries')
             count = 0
             async with self.mutex:
-                for uuid in self.submissionDb.GetUngradedSubmissionUuids():
+                for uuid in await self.submissionDb.GetUngradedSubmissionUuids():
                     self.ungradedSubmissions[uuid] = 'unclaimed'
                     count += 1
                 self.logger.Log(f'Loaded {count} ungraded entries')
-            self.gradingChannel.send(f'Server has started, loaded {count} ungraded entries. Any previous claims have been invalidated.')
+            await self.gradingChannel.send(f'Server has started, loaded {count} ungraded entries. Any previous claims have been invalidated.')
 
 
     async def OnAddSubmission(self, submission):
@@ -50,10 +50,12 @@ class GradingCog(commands.Cog):
             return
         async with self.mutex:
             uuid = ''
-            for k, v in self.ungradedSubmissions:
+            for k, v in self.ungradedSubmissions.items():
+                self.logger.Log(f'checking submission: {k} : {v}')
                 if v == 'unclaimed':
-                    v = keyUtil.KeyFromAuthor(ctx.author)
+                    self.ungradedSubmissions[k] = keyUtil.KeyFromAuthor(ctx.author)
                     uuid = k
+                    break
             if uuid == '':
                 await ctx.send('Could not find an unclaimed submission, try again later or check current submissions with `$list_submissions` or `$list_ungraded_submissions`')
                 return
