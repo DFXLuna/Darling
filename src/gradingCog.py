@@ -41,14 +41,16 @@ class GradingCog(commands.Cog):
 
     @commands.command()
     async def unclaim(self, ctx):
-        'Remove claim of an ungraded submission.'
+        'Remove claim of an ungraded submission. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('unclaim')
-        if not roleUtil.IsJudge(ctx.author.roles):
-            await ctx.send('You do not have permission to use this command')
+        
+        if (isinstance(ctx.channel, discord.channel.DMChannel) and not roleUtil.IsJudgeById(self.bot, ctx.author.id)):
+            await ctx.send(f'You do not have permission to use this command.')
             return
-        if ctx.channel.name != 'judge-grading':
-            await ctx.send(f'You must use this command in the `judge-grading` channel. This channel is `{ctx.channel.name}`')
-            return
+        elif ctx.channel.name != 'judge-grading':
+            if not roleUtil.IsJudge(ctx.author.roles):
+                await ctx.send('You do not have permission to use this command')
+                return
         
         author = keyUtil.KeyFromAuthor(ctx.author)
         uuid = ''
@@ -69,11 +71,10 @@ class GradingCog(commands.Cog):
         'Claim an ungraded submission for judging. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('claim')
 
-        if ctx.channel.name != judge-grading:
-            if (isinstance(ctx.channel, discord.channel.DMChannel) and not roleUtil.IsJudgeById(self.bot, ctx.author.id)):
-                await ctx.send(f'You do not have permission to use this command.')
-                return
-        else:
+        if (isinstance(ctx.channel, discord.channel.DMChannel) and not roleUtil.IsJudgeById(self.bot, ctx.author.id)):
+            await ctx.send(f'You do not have permission to use this command.')
+            return
+        elif ctx.channel.name != 'judge-grading':
             if not roleUtil.IsJudge(ctx.author.roles):
                 await ctx.send('You do not have permission to use this command')
                 return
@@ -106,4 +107,4 @@ class GradingCog(commands.Cog):
         submission = await self.submissionDb.GetSubmission(uuid)
 
         await ctx.author.send(f'Submission details:\nProblem Number: {submission.GetProblemNumber()}\nTeam Number: {submission.GetTeamNumber()}\nURL: {submission.GetUrl()}\nUUID: {submission.GetUuid()}\n')
-        await ctx.author.send(f'You may `$pass`, `$fail` or `$unclaim` this problem')
+        await ctx.author.send(f'You may `$pass`, `$fail` or `$unclaim` this problem\n----------------------------------------------------------------------------------------------------------------------')
