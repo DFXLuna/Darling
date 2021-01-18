@@ -23,25 +23,25 @@ class submissionDatabase:
                     self.entries[row['uuid']] = s.Submission(row['submitter'], int(row['teamNumber']),
                                                 int(row['problemNumber']), row['url'], row['gradeStatus'], row['uuid'])
                     entriesLoaded += 1
-            self.logger.Log(f"Loaded {entriesLoaded} submission entries")
+            self.logger.Log(f'Loaded {entriesLoaded} submission entries')
         else:
-            self.logger.Log("Did not load submission db")
+            self.logger.Log('Did not load submission db')
 
     async def GetSubmission(self, key):
         async with self.mutex:
-            self.logger.Log(f"GetSubmission {key}")
+            self.logger.Log(f'GetSubmission {key}')
             return self.entries.get(key)
 
     async def GetAllSubmissions(self):
         async with self.mutex:
-            self.logger.Log(f"GetAllSubmissions")
+            self.logger.Log('GetAllSubmissions')
             return list(self.entries.values())
 
     async def AddSubmission(self, submitter, teamNumber, problemNumber, url):
         async with self.mutex:
             toAdd = s.Submission(submitter, teamNumber, problemNumber, url)
             self.entries[toAdd.uuid] = toAdd
-            self.logger.Log(f"AddSubmission {toAdd.GetUuid()}, {submitter}, {teamNumber}, {problemNumber}")
+            self.logger.Log(f'AddSubmission {toAdd.GetUuid()}, {submitter}, {teamNumber}, {problemNumber}')
             await self.AddSubmissionCallbacks(toAdd)
             
     async def AddSubmissionCallbacks(self, submission):
@@ -52,9 +52,9 @@ class submissionDatabase:
 
     async def SubmissionAlreadyInProgress(self, teamNumber, problemNumber):
         async with self.mutex:
-            self.logger.Log(f"SubmissionAlreadyInProgress {teamNumber}, {problemNumber}")
+            self.logger.Log(f'SubmissionAlreadyInProgress {teamNumber}, {problemNumber}')
             for submission in self.entries.values():
-                if submission.GetTeamNumber() == teamNumber and submission.GetProblemNumber() == problemNumber and submission.GetGradeStatus() == 'ungraded':
+                if submission.GetTeamNumber() == teamNumber and submission.GetProblemNumber() == problemNumber and not submission.IsGraded():
                     return True
             return False
 
@@ -62,7 +62,7 @@ class submissionDatabase:
         self.callbacks.append(callback)
 
     def Flush(self):
-        self.logger.Log("Flushing submission db to disk")
+        self.logger.Log('Flushing submission db to disk')
         with open(self.dbfile, 'w') as f:
             fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'gradeStatus', 'url']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -72,5 +72,13 @@ class submissionDatabase:
                 writer.writerow( {'uuid': k, 'submitter': v.GetSubmitter(), 
                                 'teamNumber': v.GetTeamNumber(), 'problemNumber': v.GetProblemNumber(),
                                 'url': v.GetUrl(), 'gradeStatus': v.GetGradeStatus() } )
-        self.logger.Log("Finished flushing")
+        self.logger.Log('Finished flushing')
+
+    async def NumUngradedEntries(self):
+        count = 0
+        for entry in self.entries:
+            if not entry.IsGraded():
+                count += 1
+        return count
+
 

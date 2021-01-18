@@ -38,3 +38,6 @@ class Submission:
 
     def Ungrade(self):
         self.gradeStatus = 'ungraded'
+    
+    def IsGraded(self):
+        return self.gradeStatus != 'ungraded'
