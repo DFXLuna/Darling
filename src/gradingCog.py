@@ -68,12 +68,16 @@ class GradingCog(commands.Cog):
     async def claim(self, ctx):
         'Claim an ungraded submission for judging. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('claim')
-        if not roleUtil.IsJudge(ctx.author.roles):
-            await ctx.send('You do not have permission to use this command')
-            return
-        if (ctx.channel.name != 'judge-grading') or (isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user):
-            await ctx.send(f'You must use this command in the `judge-grading` channel. This channel is `{ctx.channel.name}`')
-            return
+
+        if ctx.channel.name != judge-grading:
+            if (isinstance(ctx.channel, discord.channel.DMChannel) and not roleUtil.IsJudgeById(self.bot, ctx.author.id)):
+                await ctx.send(f'You do not have permission to use this command.')
+                return
+        else:
+            if not roleUtil.IsJudge(ctx.author.roles):
+                await ctx.send('You do not have permission to use this command')
+                return
+        
         
         author = keyUtil.KeyFromAuthor(ctx.author)
         async with self.mutex:
@@ -99,7 +103,7 @@ class GradingCog(commands.Cog):
         ## UNLOCK MUTEX
 
         await ctx.send(f'{author} claimed {uuid}, you will receive a direct message with the details.')
-        submission = self.submissionDb.GetSubmission(uuid)
+        submission = await self.submissionDb.GetSubmission(uuid)
 
         await ctx.author.send(f'Submission details:\nProblem Number: {submission.GetProblemNumber()}\nTeam Number: {submission.GetTeamNumber()}\nURL: {submission.GetUrl()}\nUUID: {submission.GetUuid()}\n')
         await ctx.author.send(f'You may `$pass`, `$fail` or `$unclaim` this problem')
