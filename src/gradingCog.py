@@ -41,7 +41,7 @@ class GradingCog(commands.Cog):
 
     @commands.command()
     async def unclaim(self, ctx):
-        'Remove claim of an ungraded submission. This must be used in the judge-grading channel'
+        'Remove claim of an ungraded submission.'
         self.logger.Log('unclaim')
         if not roleUtil.IsJudge(ctx.author.roles):
             await ctx.send('You do not have permission to use this command')
@@ -66,12 +66,12 @@ class GradingCog(commands.Cog):
 
     @commands.command()
     async def claim(self, ctx):
-        'Claim an ungraded submission for judging. This must be used in the judge-grading channel'
+        'Claim an ungraded submission for judging. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('claim')
         if not roleUtil.IsJudge(ctx.author.roles):
             await ctx.send('You do not have permission to use this command')
             return
-        if ctx.channel.name != 'judge-grading':
+        if (ctx.channel.name != 'judge-grading') or (isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user):
             await ctx.send(f'You must use this command in the `judge-grading` channel. This channel is `{ctx.channel.name}`')
             return
         
@@ -96,6 +96,10 @@ class GradingCog(commands.Cog):
             if uuid == '':
                 await ctx.send('Could not find an unclaimed submission, try again later or check current submissions with `$list_submissions` or `$list_ungraded_submissions`')
                 return
-            
-            await ctx.send(f'successfully claimed {uuid}, you will receive a direct message with the details.')
-        # Grab submission details from submission db and dm ctx owner with deets
+        ## UNLOCK MUTEX
+
+        await ctx.send(f'{author} claimed {uuid}, you will receive a direct message with the details.')
+        submission = self.submissionDb.GetSubmission(uuid)
+
+        await ctx.author.send(f'Submission details:\nProblem Number: {submission.GetProblemNumber()}\nTeam Number: {submission.GetTeamNumber()}\nURL: {submission.GetUrl()}\nUUID: {submission.GetUuid()}\n')
+        await ctx.author.send(f'You may `$pass`, `$fail` or `$unclaim` this problem')
