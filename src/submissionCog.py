@@ -12,7 +12,7 @@ class SubmissionCog(commands.Cog):
 
     @commands.command()
     async def submit(self, ctx, problemNumber: int):
-        'Submit a solution to the given problem number. You must attach your submission file to the message. Mutiple files may be submitted as a zip archive. Syntax: `$submit <problemNumber>`'
+        'Submit a solution to the given problem number. You must attach your submission file to the message. Mutiple files must be submitted as a zip archive. Syntax: `$submit <problemNumber>`'
         if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
             self.logger.Log(f'submit {ctx.author} {problemNumber}')
             
@@ -36,7 +36,7 @@ class SubmissionCog(commands.Cog):
             await self.submissionDb.AddSubmission(keyUtil.KeyFromAuthor(ctx.author), teamNumber, problemNumber, ctx.message.attachments[0].url)
             
             for attachment in ctx.message.attachments:
-                await ctx.send(f'Attachment details:\nID {attachment.id}\nSize: {attachment.size}\nFilename: {attachment.filename}\nURL: {attachment.url}')
+                await ctx.send(f'Attachment receipt:\nID {attachment.id}\nSize: {attachment.size}\nFilename: {attachment.filename}\nURL: {attachment.url}')
         else:
             await ctx.send(f'You must direct message CodeWarsBot to use that command')
 
