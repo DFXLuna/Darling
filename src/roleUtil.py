@@ -5,7 +5,7 @@ def IsJudge(ctxRoles):
     return False
 
 # For determining if a user is a judge in the DM context
-def IsJudgeById(bot, id):
+async def IsJudgeById(bot, id):
     guild = bot.get_guild(780551282317328434)
     member = guild.get_member(id)
     if member == None:
