@@ -44,9 +44,10 @@ class GradingCog(commands.Cog):
         'Remove claim of an ungraded submission. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('unclaim')
         
-        if (isinstance(ctx.channel, discord.channel.DMChannel) and not roleUtil.IsJudgeById(self.bot, ctx.author.id)):
-            await ctx.send(f'You do not have permission to use this command.')
-            return
+        if isinstance(ctx.channel, discord.channel.DMChannel):
+            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
+                await ctx.send(f'You do not have permission to use this command.')
+                return
         elif ctx.channel.name != 'judge-grading':
             if not roleUtil.IsJudge(ctx.author.roles):
                 await ctx.send('You do not have permission to use this command')
@@ -71,12 +72,13 @@ class GradingCog(commands.Cog):
         'Claim an ungraded submission for judging. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('claim')
 
-        if (isinstance(ctx.channel, discord.channel.DMChannel) and not roleUtil.IsJudgeById(self.bot, ctx.author.id)):
-            await ctx.send(f'You do not have permission to use this command.')
-            return
+        if isinstance(ctx.channel, discord.channel.DMChannel):
+            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
+                await ctx.send(f'You do not have permission to use this command.')
+                return
         elif ctx.channel.name != 'judge-grading':
             if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('You do not have permission to use this command')
+                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
                 return
         
         
