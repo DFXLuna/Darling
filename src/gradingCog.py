@@ -11,6 +11,7 @@ class GradingCog(commands.Cog):
         self.gradingChannel = None
         self.logger = logger
         self.ungradedSubmissions = {}
+        self.currentSubmissionGraders = []
         self.mutex = asyncio.Lock()
     
     @commands.Cog.listener()
@@ -49,15 +50,27 @@ class GradingCog(commands.Cog):
             await ctx.send(f'You must use this command in the `judge-grading` channel. This channel is `{ctx.channel.name}`')
             return
         async with self.mutex:
+            author = keyUtil.KeyFromAuthor(ctx.author)
+            
+            if author in self.currentSubmissionGraders:
+                currentUuid = ''
+                for k, v in self.ungradedSubmissions.items():
+                    if v == author:
+                        currentUuid = k
+                        break
+                await ctx.send(f'You have already checked out problem {currentUuid}. Please `$pass` or `$fail` that problem before claiming a new one.')
+                return
+            
             uuid = ''
             for k, v in self.ungradedSubmissions.items():
-                self.logger.Log(f'checking submission: {k} : {v}')
                 if v == 'unclaimed':
-                    self.ungradedSubmissions[k] = keyUtil.KeyFromAuthor(ctx.author)
+                    self.ungradedSubmissions[k] = author
+                    self.currentSubmissionGraders.append(author)
                     uuid = k
                     break
             if uuid == '':
                 await ctx.send('Could not find an unclaimed submission, try again later or check current submissions with `$list_submissions` or `$list_ungraded_submissions`')
                 return
+            
             await ctx.send(f'successfully claimed {uuid}, you will receive a direct message with the details.')
         # Grab submission details from submission db and dm ctx owner with deets

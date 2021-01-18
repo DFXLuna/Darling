@@ -14,6 +14,7 @@
   - Backup, send to judges
       - Seperate claiming and judging
       - list_ungraded_submissions
+      - allow claiming and listing submissions in judge DMs
   - Primary, autograde
   - Event start time
     - Could use cog loading and unload to facilitate this
