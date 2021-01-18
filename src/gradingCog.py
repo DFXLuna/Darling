@@ -40,6 +40,31 @@ class GradingCog(commands.Cog):
                 await self.gradingChannel.send(f'New submission received, there are {len(self.ungradedSubmissions)} open submissions. Claim one with the `$claim` command')
 
     @commands.command()
+    async def unclaim(self, ctx):
+        'Remove claim of an ungraded submission. This must be used in the judge-grading channel'
+        self.logger.Log('unclaim')
+        if not roleUtil.IsJudge(ctx.author.roles):
+            await ctx.send('You do not have permission to use this command')
+            return
+        if ctx.channel.name != 'judge-grading':
+            await ctx.send(f'You must use this command in the `judge-grading` channel. This channel is `{ctx.channel.name}`')
+            return
+        
+        author = keyUtil.KeyFromAuthor(ctx.author)
+        uuid = ''
+        async with self.mutex:
+            if author in self.currentSubmissionGraders:
+                for k, v in self.ungradedSubmissions.items():
+                    if v == author:
+                        uuid = k
+                        self.ungradedSubmissions[k] = 'unclaimed'
+                        self.currentSubmissionGraders.remove(author)
+                        break
+                await ctx.send(f'You have removed your claim from problem {uuid}')
+                return
+        await ctx.send(f'You do not have a problem claimed')
+
+    @commands.command()
     async def claim(self, ctx):
         'Claim an ungraded submission for judging. This must be used in the judge-grading channel'
         self.logger.Log('claim')
@@ -49,16 +74,16 @@ class GradingCog(commands.Cog):
         if ctx.channel.name != 'judge-grading':
             await ctx.send(f'You must use this command in the `judge-grading` channel. This channel is `{ctx.channel.name}`')
             return
+        
+        author = keyUtil.KeyFromAuthor(ctx.author)
         async with self.mutex:
-            author = keyUtil.KeyFromAuthor(ctx.author)
-            
             if author in self.currentSubmissionGraders:
                 currentUuid = ''
                 for k, v in self.ungradedSubmissions.items():
                     if v == author:
                         currentUuid = k
                         break
-                await ctx.send(f'You have already checked out problem {currentUuid}. Please `$pass` or `$fail` that problem before claiming a new one.')
+                await ctx.send(f'You have already checked out problem {currentUuid}. Please `$pass`, `$fail` or `$unclaim` that problem before claiming a new one.')
                 return
             
             uuid = ''
