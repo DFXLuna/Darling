@@ -11,4 +11,10 @@ async def IsJudgeById(bot, id):
     if member == None:
         member = await guild.fetch_member(id)
     return IsJudge(member.roles)
-    
+
+# Returns a user(NOT a member). Will query the API if not in cache
+async def GetUserById(bot, id):
+    member = bot.get_user(id)
+    if member == None:
+        member = await bot.fetch_member(id)
+    return member

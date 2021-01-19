@@ -111,6 +111,7 @@ class GradingCog(commands.Cog):
         await ctx.author.send(f'Submission details:\nProblem Number: {submission.GetProblemNumber()}\nTeam Number: {submission.GetTeamNumber()}\nURL: {submission.GetUrl()}\nUUID: {submission.GetUuid()}\n')
         await ctx.author.send(f'You may `$pass`, `$fail` or `$unclaim` this problem\n----------------------------------------------------------------------------------------------------------------------')
 
+    #pass is a keyword in python, hence _pass
     @commands.command(name="pass")
     async def _pass(self, ctx):
         'Passes your currently claimed problem. This must be used in your direct messages OR the judge-grading channel'
@@ -139,5 +140,5 @@ class GradingCog(commands.Cog):
 
         submission = await self.submissionDb.GetSubmission(uuid)
         submission.Pass()
-        print(f"yuser id : {submission.GetUserId()}")
-
+        user = await roleUtil.GetUserById(self.bot, submission.GetUserId())
+        await user.send(f"Team #{submission.GetTeamNumber()}'s submission for problem {submission.GetProblemNumber()} passed!")
