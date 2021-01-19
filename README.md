@@ -15,7 +15,6 @@
       - list_ungraded_submissions
       - list_team_submissions
       - allow claiming specific problem
-      - allow listing submissions in judge DMs
   - Primary, autograde
   - Event start time
     - Could use cog loading and unload to facilitate this
