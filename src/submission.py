@@ -1,11 +1,12 @@
 import uuid as u
 
 class Submission:
-    def __init__(self, submitter, teamNumber, problemNumber, url, gradeStatus='ungraded', uuid=None):
+    def __init__(self, submitter, teamNumber, problemNumber, url, userId, gradeStatus='ungraded', uuid=None):
         self.submitter = submitter
         self.teamNumber = teamNumber
         self.problemNumber = problemNumber
         self.url = url
+        self.userId = userId
         self.gradeStatus = gradeStatus
         if uuid is None:
             self.uuid = u.uuid4()
@@ -23,6 +24,9 @@ class Submission:
 
     def GetUrl(self):
         return self.url
+
+    def GetUserId(self):
+        return self.userId
 
     def GetGradeStatus(self):
         return self.gradeStatus

@@ -110,3 +110,34 @@ class GradingCog(commands.Cog):
 
         await ctx.author.send(f'Submission details:\nProblem Number: {submission.GetProblemNumber()}\nTeam Number: {submission.GetTeamNumber()}\nURL: {submission.GetUrl()}\nUUID: {submission.GetUuid()}\n')
         await ctx.author.send(f'You may `$pass`, `$fail` or `$unclaim` this problem\n----------------------------------------------------------------------------------------------------------------------')
+
+    @commands.command(name="pass")
+    async def _pass(self, ctx):
+        'Passes your currently claimed problem. This must be used in your direct messages OR the judge-grading channel'
+
+        if isinstance(ctx.channel, discord.channel.DMChannel):
+            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
+                await ctx.send(f'You do not have permission to use this command.')
+                return
+        elif ctx.channel.name != 'judge-grading':
+            if not roleUtil.IsJudge(ctx.author.roles):
+                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
+                return
+        
+        uuid = ''
+        author = keyUtil.KeyFromAuthor(ctx.author)
+        async with self.mutex:
+            if not author in self.currentSubmissionGraders:
+                await ctx.send('You do not have a claimed problem. `$claim` to receive a problem for grading')
+                return
+            self.currentSubmissionGraders.remove(author)
+            for k, v in self.ungradedSubmissions.items():
+                if v == author:
+                    uuid = k
+            del self.ungradedSubmissions[uuid]
+        ## UNLOCK MUTEX
+
+        submission = await self.submissionDb.GetSubmission(uuid)
+        submission.Pass()
+        print(f"yuser id : {submission.GetUserId()}")
+
