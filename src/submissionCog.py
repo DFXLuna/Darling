@@ -12,7 +12,7 @@ class SubmissionCog(commands.Cog):
 
     @commands.command()
     async def submit(self, ctx, problemNumber: int):
-        'Submit a solution to the given problem number. You must attach your submission file to the message. Mutiple files must be submitted as a zip archive. Syntax: `$submit <problemNumber>`'
+        'Submit a solution to the given problem number. You must attach your submission file to the message. Mutiple files must be submitted as a zip archive. You must DM CodeWarsBot to use this command Syntax: `$submit <problemNumber>`'
         if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
             self.logger.Log(f'submit {ctx.author} {problemNumber}')
             
@@ -43,13 +43,15 @@ class SubmissionCog(commands.Cog):
     @commands.command()
     async def list_submissions(self, ctx):
         'Lists all submissions currently in the database'
-        if not roleUtil.IsJudge(ctx.author.roles):
-            await ctx.send('You do not have permission to use this command')
-            return
-        if ctx.channel.name != 'judge-grading':
-            await ctx.send(f'You must use this command in the `judge-grading` channel. This channel is `{ctx.channel.name}`')
-            return
-
+        if isinstance(ctx.channel, discord.channel.DMChannel):
+            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
+                await ctx.send(f'You do not have permission to use this command.')
+                return
+        elif ctx.channel.name != 'judge-grading':
+            if not roleUtil.IsJudge(ctx.author.roles):
+                await ctx.send('You do not have permission to use this command')
+                return
+        
         entries = await self.submissionDb.GetAllSubmissions()
         displayString = ''
         for entry in entries:

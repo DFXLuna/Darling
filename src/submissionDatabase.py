@@ -63,17 +63,17 @@ class submissionDatabase:
         self.callbacks.append(callback)
 
     def Flush(self):
-        self.logger.Log('Flushing submission db to disk')
         with open(self.dbfile, 'w') as f:
             fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'url', 'userId', 'gradeStatus' ]
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
-
+            count = 0
             for k, v in self.entries.items():
                 writer.writerow( {'uuid': k, 'submitter': v.GetSubmitter(), 
                                 'teamNumber': v.GetTeamNumber(), 'problemNumber': v.GetProblemNumber(),
                                 'url': v.GetUrl(), 'userId': v.GetUserId(), 'gradeStatus': v.GetGradeStatus() } )
-        self.logger.Log('Finished flushing')
+                count += 1
+        self.logger.Log(f'Flushed {count} submissions to disk')
 
     async def NumUngradedEntries(self):
         self.logger.Log('NumUngradedEntries')

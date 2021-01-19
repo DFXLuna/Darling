@@ -37,12 +37,13 @@ class RegistrationDatabase:
             self.entries.pop(name)
 
     def Flush(self):
-        self.logger.Log("Flushing registration to disk")
         with open(self.dbfile, 'w') as f:
             fieldnames = ['user', 'team']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
 
+            count = 0
             for k,v in self.entries.items():
                 writer.writerow( {'user': k, 'team': v} )
-        self.logger.Log("Finished flushing")
+                count += 1
+        self.logger.Log(f'Flushed {count} registrations to disk')

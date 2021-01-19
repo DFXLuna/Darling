@@ -12,8 +12,8 @@
 ## TODO(priority order): 
 - Add problem submission commands
   - Backup, send to judges
-      - Seperate claiming and judging
       - list_ungraded_submissions
+      - list_team_submissions
       - allow claiming specific problem
       - allow listing submissions in judge DMs
   - Primary, autograde
