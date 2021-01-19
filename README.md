@@ -15,8 +15,9 @@
       - Seperate claiming and judging
       - list_ungraded_submissions
       - allow claiming specific problem
-      - allow claiming and listing submissions in judge DMs
+      - allow listing submissions in judge DMs
   - Primary, autograde
   - Event start time
     - Could use cog loading and unload to facilitate this
+  - optimize mutex locks
   - Remote client failsafe
