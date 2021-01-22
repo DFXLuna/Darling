@@ -12,6 +12,7 @@ class GradingCog(commands.Cog):
         self.logger = logger
         self.ungradedSubmissions = {}
         self.currentSubmissionGraders = []
+        self.failureReasons = ['Did not compile', 'Did not run', 'Syntax Error', 'Program crashes', 'Incorrect output', 'Incomplete output', 'Fails with sample input data, please test your program with the sample data!', 'Fails with judge input data', 'Java class name does not match file name']
         self.mutex = asyncio.Lock()
     
     @commands.Cog.listener()
@@ -90,7 +91,7 @@ class GradingCog(commands.Cog):
                     if v == author:
                         currentUuid = k
                         break
-                await ctx.send(f'You have already checked out problem {currentUuid}. Please `$pass`, `$fail` or `$unclaim` that problem before claiming a new one.')
+                await ctx.send(f'You have already checked out problem {currentUuid}. Please `$pass`, `$fail`, `$quick_fail` or `$unclaim` that problem before claiming a new one.')
                 return
             
             uuid = ''
@@ -109,13 +110,13 @@ class GradingCog(commands.Cog):
         submission = await self.submissionDb.GetSubmission(uuid)
 
         await ctx.author.send(f'Submission details:\nProblem Number: {submission.GetProblemNumber()}\nTeam Number: {submission.GetTeamNumber()}\nURL: {submission.GetUrl()}\nUUID: {submission.GetUuid()}\n')
-        await ctx.author.send(f'You may `$pass`, `$fail` or `$unclaim` this problem\n----------------------------------------------------------------------------------------------------------------------')
+        await ctx.author.send(f'You may `$pass`, `$fail`, `$quick_fail` or `$unclaim` this problem\n----------------------------------------------------------------------------------------------------------------------')
 
     #pass is a keyword in python, hence _pass
     @commands.command(name="pass")
     async def _pass(self, ctx):
         'Passes your currently claimed problem. This must be used in your direct messages OR the judge-grading channel'
-
+        self.logger.Log('pass')
         if isinstance(ctx.channel, discord.channel.DMChannel):
             if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
                 await ctx.send(f'You do not have permission to use this command.')
@@ -140,5 +141,77 @@ class GradingCog(commands.Cog):
 
         submission = await self.submissionDb.GetSubmission(uuid)
         submission.Pass()
+        await self.submissionDb.AsyncFlush()
         user = await roleUtil.GetUserById(self.bot, submission.GetUserId())
         await user.send(f"Team #{submission.GetTeamNumber()}'s submission for problem {submission.GetProblemNumber()} passed!")
+
+    @commands.command()
+    async def fail(self, ctx, reason):
+        'Fails your currently claimed problem and send the submitting team the provided quote wrapped message. Your message must be surrounded by quotes. This must be used in your direct messages OR the judge-grading channel. '
+        self.logger.Log('fail')
+        if isinstance(ctx.channel, discord.channel.DMChannel):
+            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
+                await ctx.send(f'You do not have permission to use this command.')
+                return
+        elif ctx.channel.name != 'judge-grading':
+            if not roleUtil.IsJudge(ctx.author.roles):
+                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
+                return
+        
+        uuid = ''
+        author = keyUtil.KeyFromAuthor(ctx.author)
+        async with self.mutex:
+            if not author in self.currentSubmissionGraders:
+                await ctx.send('You do not have a claimed problem. `$claim` to receive a problem for grading')
+                return
+            self.currentSubmissionGraders.remove(author)
+            for k, v in self.ungradedSubmissions.items():
+                if v == author:
+                    uuid = k
+            del self.ungradedSubmissions[uuid]
+        ## UNLOCK MUTEX
+
+        submission = await self.submissionDb.GetSubmission(uuid)
+        submission.Fail()
+        await self.submissionDb.AsyncFlush()
+        user = await roleUtil.GetUserById(self.bot, submission.GetUserId())
+        await ctx.send(f'Problem #{submission.GetProblemNumber()} from team #{submission.GetTeamNumber()} failed successfully!')
+        await user.send(f"Team #{submission.GetTeamNumber()}'s submission for problem {submission.GetProblemNumber()} failed. Judge note: {reason}")
+
+    @commands.command()
+    async def quick_fail(self, ctx, number, note=''):
+        'Fails your currently claimed problem and send the submitting team a prewritten message and an optional note. See $quick_fail_reasons to get responses. Your message must be surrounded by quotes. This must be used in your direct messages OR the judge-grading channel. '
+        self.logger.Log('quick_fail')
+        if isinstance(ctx.channel, discord.channel.DMChannel):
+            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
+                await ctx.send(f'You do not have permission to use this command.')
+                return
+        elif ctx.channel.name != 'judge-grading':
+            if not roleUtil.IsJudge(ctx.author.roles):
+                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
+                return
+
+        n = int(number)
+        if n < 0 or n > len(self.failureReasons) - 1:
+            await ctx.send(f'Failure number {n} is not valid. Valid failure numbers are 0 - {len(self.failureReasons) - 1}. See `$quick_fail_reasons` for all valid `$quick_fail` numbers.')
+            return 
+
+        await self.fail(ctx, self.failureReasons[n] + '. ' + note)
+
+    @commands.command()
+    async def quick_fail_reasons(self, ctx):
+        'Lists all quick fail reason numbers and the message they correspond to'
+        if isinstance(ctx.channel, discord.channel.DMChannel):
+            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
+                await ctx.send(f'You do not have permission to use this command.')
+                return
+        elif ctx.channel.name != 'judge-grading':
+            if not roleUtil.IsJudge(ctx.author.roles):
+                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
+                return
+        
+        output = f'`$quick_fail` numbers:\n'
+        for i in range(0, len(self.failureReasons) - 1):
+            output += f'> #**{i}**: {self.failureReasons[i]}\n'
+
+        await ctx.send(output)

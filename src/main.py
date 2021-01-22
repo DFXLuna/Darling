@@ -39,9 +39,9 @@ else:
         bot.run(token)
     except:
         reg.Flush()
-        sub.Flush()
+        sub.SyncFlush()
         sys.exit(1)
 
 reg.Flush()
-sub.Flush()
+sub.SyncFlush()
 
