@@ -15,6 +15,7 @@
 ## TODO(priority order): 
 - Add problem submission commands
   - Backup, send to judges
+      - file name validation
       - list_ungraded_submissions
       - factor judge check
       - list_team_submissions
@@ -25,3 +26,4 @@
     - Could use cog loading and unload to facilitate this
   - optimize mutex locks
   - Remote client failsafe
+     - Give backup credentials to someone
