@@ -62,7 +62,7 @@ class submissionDatabase:
     async def RegisterAddSubmissionCallback(self, callback):
         self.callbacks.append(callback)
 
-    def Flush(self):
+    def SyncFlush(self):
         with open(self.dbfile, 'w') as f:
             fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'url', 'userId', 'gradeStatus' ]
             writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -73,7 +73,21 @@ class submissionDatabase:
                                 'teamNumber': v.GetTeamNumber(), 'problemNumber': v.GetProblemNumber(),
                                 'url': v.GetUrl(), 'userId': v.GetUserId(), 'gradeStatus': v.GetGradeStatus() } )
                 count += 1
-        self.logger.Log(f'Flushed {count} submissions to disk')
+        self.logger.Log(f'Flushed {count} submissions to disk on exit')
+
+    async def AsyncFlush(self):
+        with self.mutex:
+            with open(self.dbfile, 'w') as f:
+                fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'url', 'userId', 'gradeStatus' ]
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                count = 0
+                for k, v in self.entries.items():
+                    writer.writerow( {'uuid': k, 'submitter': v.GetSubmitter(), 
+                                    'teamNumber': v.GetTeamNumber(), 'problemNumber': v.GetProblemNumber(),
+                                    'url': v.GetUrl(), 'userId': v.GetUserId(), 'gradeStatus': v.GetGradeStatus() } )
+                    count += 1
+        self.logger.Log(f'Flushed {count} submissions')
 
     async def NumUngradedEntries(self):
         self.logger.Log('NumUngradedEntries')
