@@ -16,7 +16,6 @@
 - Add problem submission commands
   - Primary, send to judges
       - file name validation
-      - list_ungraded_submissions
       - allow claiming specific problem
       - judge_help, student_help
   - Prevent registration cheating
