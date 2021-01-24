@@ -188,7 +188,7 @@ class GradingCog(commands.Cog):
                 return
         elif ctx.channel.name != 'judge-grading':
             if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
+                await ctx.send('This command may only be used in Judge DMs or by judges in `judge-grading`')
                 return
 
         n = int(number)
@@ -201,14 +201,8 @@ class GradingCog(commands.Cog):
     @commands.command()
     async def quick_fail_reasons(self, ctx):
         'Lists all quick fail reason numbers and the message they correspond to'
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
-                await ctx.send(f'You do not have permission to use this command.')
-                return
-        elif ctx.channel.name != 'judge-grading':
-            if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
-                return
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
         
         output = f'`$quick_fail` numbers:\n'
         for i in range(0, len(self.failureReasons) - 1):
