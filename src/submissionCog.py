@@ -43,18 +43,40 @@ class SubmissionCog(commands.Cog):
     @commands.command()
     async def list_submissions(self, ctx):
         'Lists all submissions currently in the database'
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
-                await ctx.send(f'You do not have permission to use this command.')
-                return
-        elif ctx.channel.name != 'judge-grading':
-            if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('You do not have permission to use this command')
-                return
-        
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+
         entries = await self.submissionDb.GetAllSubmissions()
-        displayString = ''
+        displayString = 'Submissions:\n'
         for entry in entries:
             displayString += f'> Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}, status: {entry.GetGradeStatus()}\n'
+
+        await ctx.send(displayString)
+
+
+    @commands.command()
+    async def list_ungraded_submissions(self, ctx):
+        'Lists all ungraded submissions currently in the database'
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+
+        entries = await self.submissionDb.GetUngradedSubmissions()
+        displayString = 'Ungraded Submissions:\n'
+        for entry in entries:
+            displayString += f'> Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}\n'
+
+        await ctx.send(displayString)
+
+    @commands.command()
+    async def list_team_submissions(self, ctx):
+        'Lists all submissions for a team'
+        if not await roleUtil.IsValidDMContext(ctx, self.bot):
+            return
+
+        teamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
+        entries = await self.submissionDb.GetTeamSubmissions(teamNumber)
+        displayString = f"Team #{teamNumber} Submissions:\n"
+        for entry in entries:
+            displayString += f'> Problem: {entry.GetProblemNumber()}, status: {entry.GetGradeStatus()}\n'
 
         await ctx.send(displayString)

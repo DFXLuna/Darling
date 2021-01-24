@@ -14,15 +14,18 @@
 
 ## TODO(priority order): 
 - Add problem submission commands
-  - Backup, send to judges
+  - Primary, send to judges
       - file name validation
       - list_ungraded_submissions
-      - list_team_submissions
       - allow claiming specific problem
       - judge_help, student_help
-  - Primary, autograde
+  - Prevent registration cheating
+    - Remove reregistration commands and require judge approval. Verify registration command
+  - Async reg flush
+  - ~~Primary, autograde~~
   - Event start time
     - Could use cog loading and unload to facilitate this
   - optimize mutex locks
+  - optimize multiple awaits to concurrent
   - Remote client failsafe
      - Give backup credentials to someone

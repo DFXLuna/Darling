@@ -76,7 +76,7 @@ class submissionDatabase:
         self.logger.Log(f'Flushed {count} submissions to disk on exit')
 
     async def AsyncFlush(self):
-        with self.mutex:
+        async with self.mutex:
             with open(self.dbfile, 'w') as f:
                 fieldnames = ['uuid', 'submitter', 'teamNumber', 'problemNumber', 'url', 'userId', 'gradeStatus' ]
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -102,5 +102,21 @@ class submissionDatabase:
                     uuids.append(entry.GetUuid())
             return uuids
 
+    async def GetUngradedSubmissions(self):
+        submissions = []
+        self.logger.Log('GetUngradedSubmission')
+        async with self.mutex:
+            for entry in self.entries.values():
+                if not entry.IsGraded():
+                    submissions.append(entry)
+            return submissions
 
+    async def GetTeamSubmissions(self, teamNumber):
+        self.logger.Log('GetTeamSubmissions')
+        submissions = []
+        async with self.mutex:
+            for entry in self.entries.values():
+                if entry.GetTeamNumber() == teamNumber:
+                    submissions.append(entry)
+            return submissions
 

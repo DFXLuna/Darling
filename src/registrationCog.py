@@ -15,49 +15,33 @@ class RegistrationCog(commands.Cog):
     async def register(self, ctx, teamNumber: int):
         "Register yourself to a single team, removes any other registrations. Syntax: `$register <teamNumber>`"
         if await roleUtil.IsValidDMContext(ctx, self.bot):
-            try:
-                self.logger.Log(f'register {ctx.author} {teamNumber}')
-                
-                currentTeamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
-                if currentTeamNumber is not None:
-                    await ctx.send(f'{ctx.author} is already registered to #{currentTeamNumber}. Replacing that registration with #{teamNumber}')
+            self.logger.Log(f'register {ctx.author} {teamNumber}')
+            
+            currentTeamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
+            if currentTeamNumber is not None:
+                await ctx.send(f'{ctx.author} is already registered to #{currentTeamNumber}. Replacing that registration with #{teamNumber}')
 
-                await self.registrationDb.Register(keyUtil.KeyFromAuthor(ctx.author), teamNumber)
-                await ctx.send(f'Registered {ctx.author} to team #{teamNumber}')
-            except Exception as e:
-                await ctx.send('USAGE: $register [teamNumber]\ne.g. $register 1234')
-                await ctx.send(e.args)
-            return
-        else:
-            await ctx.send(f'You must direct message CodeWarsBot to use that command')
+            await self.registrationDb.Register(keyUtil.KeyFromAuthor(ctx.author), teamNumber)
+            await ctx.send(f'Registered {ctx.author} to team #{teamNumber}')
+        return
 
     @commands.command()
     async def unregister(self, ctx):
         "Remove your registration from all teams."
         if await roleUtil.IsValidDMContext(ctx, self.bot):
-            try:
-                await self.registrationDb.Unregister(keyUtil.KeyFromAuthor(ctx.author))
-                self.logger.Log(f'unregister {ctx.author} from all teams')
-                await ctx.send(f'unregistered {ctx.author}')
-            except Exception as e:
-                await ctx.send(e.args)
-            return
-        else:
-            await ctx.send(f'You must direct message CodeWarsBot to use that command')
+            await self.registrationDb.Unregister(keyUtil.KeyFromAuthor(ctx.author))
+            self.logger.Log(f'unregister {ctx.author} from all teams')
+            await ctx.send(f'unregistered {ctx.author}')
+        return 
 
     @commands.command()
     async def check_registration(self, ctx):
         "Check which team you are registered to."
         if await roleUtil.IsValidDMContext(ctx, self.bot):
             self.logger.Log(f'check_registration {ctx.author}')
-            try:
-                teamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
-                if teamNumber is not None:
-                    await ctx.send(f'{ctx.author} is registered to #{teamNumber}')
-                else:
-                    await ctx.send(f'{ctx.author} is not registered')
-            except Exception as e:
-                await ctx.send(e.args)
-            return
-        else:
-            await ctx.send(f'You must direct message CodeWarsBot to use that command')
+            teamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
+            if teamNumber is not None:
+                await ctx.send(f'{ctx.author} is registered to #{teamNumber}')
+            else:
+                await ctx.send(f'{ctx.author} is not registered')
+        return

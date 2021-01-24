@@ -35,4 +35,7 @@ async def IsValidJudgeContext(ctx, bot):
     return True
 
 async def IsValidDMContext(ctx, bot):
-    return isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != bot.user
+    if not isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != bot.user:
+        await ctx.send('You must use this command in a direct message to CodeWarsBot')
+        return False
+    return True
