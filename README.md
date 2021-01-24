@@ -17,7 +17,6 @@
   - Backup, send to judges
       - file name validation
       - list_ungraded_submissions
-      - factor judge check
       - list_team_submissions
       - allow claiming specific problem
       - judge_help, student_help

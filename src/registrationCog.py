@@ -2,6 +2,7 @@ import discord
 import registrationDatabase as r
 import logger as l
 import keyUtil
+import roleUtil
 from discord.ext import commands
 
 class RegistrationCog(commands.Cog):
@@ -13,7 +14,7 @@ class RegistrationCog(commands.Cog):
     @commands.command()
     async def register(self, ctx, teamNumber: int):
         "Register yourself to a single team, removes any other registrations. Syntax: `$register <teamNumber>`"
-        if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
+        if await roleUtil.IsValidDMContext(ctx, self.bot):
             try:
                 self.logger.Log(f'register {ctx.author} {teamNumber}')
                 
@@ -33,7 +34,7 @@ class RegistrationCog(commands.Cog):
     @commands.command()
     async def unregister(self, ctx):
         "Remove your registration from all teams."
-        if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
+        if await roleUtil.IsValidDMContext(ctx, self.bot):
             try:
                 await self.registrationDb.Unregister(keyUtil.KeyFromAuthor(ctx.author))
                 self.logger.Log(f'unregister {ctx.author} from all teams')
@@ -47,7 +48,7 @@ class RegistrationCog(commands.Cog):
     @commands.command()
     async def check_registration(self, ctx):
         "Check which team you are registered to."
-        if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
+        if await roleUtil.IsValidDMContext(ctx, self.bot):
             self.logger.Log(f'check_registration {ctx.author}')
             try:
                 teamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
