@@ -1,3 +1,5 @@
+import discord
+
 def IsJudge(ctxRoles):
     for role in ctxRoles:
         if role.name == "Judge" or role.name == "Volunteer" or role.name == "Admin":
@@ -18,3 +20,16 @@ async def GetUserById(bot, id):
     if member == None:
         member = await bot.fetch_member(id)
     return member
+
+async def IsValidJudgeContext(ctx, bot):
+    if isinstance(ctx.channel, discord.channel.DMChannel):
+        if not await IsJudgeById(bot, ctx.author.id):
+            await ctx.send(f'You do not have permission to use this command.')
+            return False
+    elif ctx.channel.name != 'judge-grading':
+        if IsJudge(ctx.author.roles):
+            await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
+        else:
+            await ctx.send('You do not have permission to use this command')
+        return False
+    return True
