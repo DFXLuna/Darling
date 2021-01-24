@@ -44,16 +44,10 @@ class GradingCog(commands.Cog):
     async def unclaim(self, ctx):
         'Remove claim of an ungraded submission. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('unclaim')
-        
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
-                await ctx.send(f'You do not have permission to use this command.')
-                return
-        elif ctx.channel.name != 'judge-grading':
-            if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('You do not have permission to use this command')
-                return
-        
+
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+
         author = keyUtil.KeyFromAuthor(ctx.author)
         uuid = ''
         async with self.mutex:
@@ -73,16 +67,9 @@ class GradingCog(commands.Cog):
         'Claim an ungraded submission for judging. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('claim')
 
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
-                await ctx.send(f'You do not have permission to use this command.')
-                return
-        elif ctx.channel.name != 'judge-grading':
-            if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
-                return
-        
-        
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+
         author = keyUtil.KeyFromAuthor(ctx.author)
         async with self.mutex:
             if author in self.currentSubmissionGraders:
@@ -117,15 +104,9 @@ class GradingCog(commands.Cog):
     async def _pass(self, ctx):
         'Passes your currently claimed problem. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('pass')
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
-                await ctx.send(f'You do not have permission to use this command.')
-                return
-        elif ctx.channel.name != 'judge-grading':
-            if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
-                return
-        
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+
         uuid = ''
         author = keyUtil.KeyFromAuthor(ctx.author)
         async with self.mutex:
@@ -149,15 +130,9 @@ class GradingCog(commands.Cog):
     async def fail(self, ctx, reason):
         'Fails your currently claimed problem and send the submitting team the provided quote wrapped message. Your message must be surrounded by quotes. This must be used in your direct messages OR the judge-grading channel. '
         self.logger.Log('fail')
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
-                await ctx.send(f'You do not have permission to use this command.')
-                return
-        elif ctx.channel.name != 'judge-grading':
-            if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('This command may only be used in Judge DMs or `judge-grading`')
-                return
-        
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+
         uuid = ''
         author = keyUtil.KeyFromAuthor(ctx.author)
         async with self.mutex:
@@ -182,14 +157,8 @@ class GradingCog(commands.Cog):
     async def quick_fail(self, ctx, number, note=''):
         'Fails your currently claimed problem and send the submitting team a prewritten message and an optional note. See $quick_fail_reasons to get responses. Your message must be surrounded by quotes. This must be used in your direct messages OR the judge-grading channel. '
         self.logger.Log('quick_fail')
-        if isinstance(ctx.channel, discord.channel.DMChannel):
-            if not await roleUtil.IsJudgeById(self.bot, ctx.author.id):
-                await ctx.send(f'You do not have permission to use this command.')
-                return
-        elif ctx.channel.name != 'judge-grading':
-            if not roleUtil.IsJudge(ctx.author.roles):
-                await ctx.send('This command may only be used in Judge DMs or by judges in `judge-grading`')
-                return
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
 
         n = int(number)
         if n < 0 or n > len(self.failureReasons) - 1:

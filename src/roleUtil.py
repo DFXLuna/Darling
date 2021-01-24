@@ -33,3 +33,6 @@ async def IsValidJudgeContext(ctx, bot):
             await ctx.send('You do not have permission to use this command')
         return False
     return True
+
+async def IsValidDMContext(ctx, bot):
+    return isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != bot.user
