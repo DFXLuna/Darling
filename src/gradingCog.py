@@ -23,7 +23,6 @@ class GradingCog(commands.Cog):
         
         await self.submissionDb.RegisterAddSubmissionCallback(self.OnAddSubmission)
         if await self.submissionDb.NumUngradedEntries() > 0:
-            self.logger.Log(f'Loading {await self.submissionDb.NumUngradedEntries()} ungraded entries')
             count = 0
             async with self.mutex:
                 for uuid in await self.submissionDb.GetUngradedSubmissionUuids():
@@ -63,7 +62,7 @@ class GradingCog(commands.Cog):
         await ctx.send(f'You do not have a problem claimed')
 
     @commands.command()
-    async def claim(self, ctx):
+    async def claim(self, ctx, requestuuid=None):
         'Claim an ungraded submission for judging. This must be used in your direct messages OR the judge-grading channel'
         self.logger.Log('claim')
 
@@ -71,6 +70,7 @@ class GradingCog(commands.Cog):
             return
 
         author = keyUtil.KeyFromAuthor(ctx.author)
+        uuid = ''
         async with self.mutex:
             if author in self.currentSubmissionGraders:
                 currentUuid = ''
@@ -80,17 +80,27 @@ class GradingCog(commands.Cog):
                         break
                 await ctx.send(f'You have already checked out problem {currentUuid}. Please `$pass`, `$fail`, `$quick_fail` or `$unclaim` that problem before claiming a new one.')
                 return
-            
-            uuid = ''
-            for k, v in self.ungradedSubmissions.items():
-                if v == 'unclaimed':
-                    self.ungradedSubmissions[k] = author
+            if requestuuid == None:
+                for k, v in self.ungradedSubmissions.items():
+                    if v == 'unclaimed':
+                        self.ungradedSubmissions[k] = author 
+                        self.currentSubmissionGraders.append(author)
+                        uuid = k
+                        break
+                if uuid == '':
+                    await ctx.send('Could not find an unclaimed submission, try again later or check current submissions with `$list_submissions` or `$list_ungraded_submissions`')
+                    return
+            else:
+                if requestuuid in self.ungradedSubmissions:
+                    if self.ungradedSubmissions[requestuuid] != 'unclaimed':
+                        await ctx.send(f'The problem with the requested uuid has already been claimed, ask {self.ungradedSubmissions[requestuuid]} to unclaim it.')
+                        return
+                    self.ungradedSubmissions[requestuuid] = author
                     self.currentSubmissionGraders.append(author)
-                    uuid = k
-                    break
-            if uuid == '':
-                await ctx.send('Could not find an unclaimed submission, try again later or check current submissions with `$list_submissions` or `$list_ungraded_submissions`')
-                return
+                    uuid = requestuuid
+                else:
+                    await ctx.send(f'The problem with the requested uuid is not a valid problem. It has either been graded or the uuid you have requested is incorrect.')
+                    return
         ## UNLOCK MUTEX
 
         await ctx.send(f'{author} claimed {uuid}, you will receive a direct message with the details.')
