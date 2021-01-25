@@ -15,7 +15,6 @@
 ## TODO(priority order): 
 - Add problem submission commands
   - Primary, send to judges
-      - file name validation
       - allow claiming specific problem
       - judge_help, student_help
   - Prevent registration cheating
