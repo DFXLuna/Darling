@@ -58,10 +58,22 @@ class SubmissionCog(commands.Cog):
         entries = await self.submissionDb.GetAllSubmissions()
         displayString = 'Submissions:\n'
         for entry in entries:
-            displayString += f'> Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}, status: {entry.GetGradeStatus()}\n'
+            displayString += f'> Problem: **{entry.GetProblemNumber()}**, Team: **{entry.GetTeamNumber()}**, Status: **{entry.GetGradeStatus()}**\n'
 
         await ctx.send(displayString)
 
+    @commands.command()
+    async def list_uuids(self, ctx):
+        'Lists all submissions with uuids currently in the database'
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+
+        entries = await self.submissionDb.GetAllSubmissions()
+        displayString = 'Submissions:\n'
+        for entry in entries:
+            displayString += f'> UUID: {entry.GetUuid()} Problem: **{entry.GetProblemNumber()}**, Team: **{entry.GetTeamNumber()}**, Status: **{entry.GetGradeStatus()}**\n'
+
+        await ctx.send(displayString)
 
     @commands.command()
     async def list_ungraded_submissions(self, ctx):
