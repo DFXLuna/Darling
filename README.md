@@ -21,7 +21,6 @@
   - Prevent registration cheating
     - Remove reregistration commands and require judge approval. Verify registration command
   - Async reg flush
-  - ~~Primary, autograde~~
   - Event start time
     - Could use cog loading and unload to facilitate this
   - optimize mutex locks
