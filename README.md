@@ -15,8 +15,8 @@
 ## TODO(priority order): 
 - Add problem submission commands
   - Primary, send to judges
-      - allow claiming specific problem
-      - judge_help, student_help
+      - list_registrations
+      - student_help
   - Prevent registration cheating
     - Remove reregistration commands and require judge approval. Verify registration command
   - Async reg flush
