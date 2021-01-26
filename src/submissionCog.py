@@ -25,7 +25,7 @@ class SubmissionCog(commands.Cog):
                 return
 
             if len(ctx.message.attachments) == 0:
-                await ctx.send(f'No attachment found, please attach your submission files to the command message. Multiple files may be submitted as a zip archive.')
+                await ctx.send(f'No attachment found, please attach your submission file to the command message. Multiple files may be submitted as a zip archive.')
                 return
 
             if len(ctx.message.attachments) > 1:
@@ -33,7 +33,7 @@ class SubmissionCog(commands.Cog):
                 return
 
             if await self.submissionDb.SubmissionAlreadyInProgress(teamNumber, int(problemNumber)):
-                await ctx.send(f'team #{teamNumber} has already submitted problem {problemNumber}. Please wait for the judges to judge your submission before resubmitting.')
+                await ctx.send(f'Team #{teamNumber} has already submitted problem {problemNumber}. Please wait for the judges to judge your submission before resubmitting.')
                 return
 
             if not await self.VerifyFileName(ctx.message.attachments[0].filename, int(problemNumber)):
@@ -84,7 +84,7 @@ class SubmissionCog(commands.Cog):
         entries = await self.submissionDb.GetUngradedSubmissions()
         displayString = 'Ungraded Submissions:\n'
         for entry in entries:
-            displayString += f'> Problem: {entry.GetProblemNumber()}, team: {entry.GetTeamNumber()}\n'
+            displayString += f'> Problem: **{entry.GetProblemNumber()}**, team: **{entry.GetTeamNumber()}**\n'
 
         await ctx.send(displayString)
 

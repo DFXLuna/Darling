@@ -17,8 +17,6 @@
   - Primary, send to judges
       - list_registrations
       - student_help
-  - Prevent registration cheating
-    - Remove reregistration commands and require judge approval. Verify registration command
   - Async reg flush
   - Event start time
     - Could use cog loading and unload to facilitate this
