@@ -13,14 +13,8 @@
     - On ubuntu 20.04 `python3 src/main.py`
 
 ## TODO(priority order): 
-- Add problem submission commands
-  - Primary, send to judges
-      - list_registrations
-      - student_help
-  - Async reg flush
-  - Event start time
-    - Could use cog loading and unload to facilitate this
-  - optimize mutex locks
-  - optimize multiple awaits to concurrent
-  - Remote client failsafe
-     - Give backup credentials to someone
+- Event start time
+  - Could use cog loading and unload to facilitate this
+- Async reg flush
+- optimize mutex locks
+- optimize multiple awaits to concurrent

@@ -45,3 +45,11 @@ class RegistrationCog(commands.Cog):
             else:
                 await ctx.send(f'{ctx.author} is not registered')
         return
+
+    @commands.command()
+    async def list_registrations(self, ctx):
+        if await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            displayString = 'Registrations: \n'
+            for k, v in (await self.registrationDb.GetAllRegistrations()).items():
+                displayString += f'> User: **{k}**, Team: **{v}**\n'
+            await ctx.send(displayString)

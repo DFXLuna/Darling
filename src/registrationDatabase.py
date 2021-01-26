@@ -35,6 +35,10 @@ class RegistrationDatabase:
     async def Unregister(self, name):
         async with self.mutex:
             self.entries.pop(name)
+    
+    async def GetAllRegistrations(self):
+        async with self.mutex:
+            return self.entries
 
     def Flush(self):
         with open(self.dbfile, 'w') as f:
