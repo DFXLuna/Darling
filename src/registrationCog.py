@@ -26,11 +26,11 @@ class RegistrationCog(commands.Cog):
         return
 
     @commands.command()
-    async def unregister(self, ctx):
-        "Remove your registration from all teams."
-        if await roleUtil.IsValidDMContext(ctx, self.bot):
-            await self.registrationDb.Unregister(keyUtil.KeyFromAuthor(ctx.author))
-            self.logger.Log(f'unregister {ctx.author} from all teams')
+    async def unregister(self, ctx, author):
+        "Remove your registration from all teams. Name must be in the form `username#number`. This command must be run in judge-grading or in judge DMs."
+        if await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            await self.registrationDb.Unregister(author)
+            self.logger.Log(f'unregister {ctx.author}')
             await ctx.send(f'unregistered {ctx.author}')
         return 
 
