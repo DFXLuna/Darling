@@ -27,7 +27,8 @@ Judge commands:
 **Registration**:
 > `$check_registration` Check which team you are registered to. You must DM CodeWarsBot to use this command.
 > `$register <teamNumber>` Register yourself to a single team, removes any other registrations. You must DM CodeWarsBot to use this command.
-> `$unregister <user#userNumber>` 'Remove user's registration from all times. Use this sparingly. This must be used in your direct messages OR the judge-grading channel.
+> `$unregister <user#userNumber>` Remove user's registration from all times. Use this sparingly. This must be used in your direct messages OR the judge-grading channel.
+> `$list_registrations` Lists all registered students and their teams.
 
 **Submission**:
 > `$submit <problemNumber>` Submit a solution to the given problem number. You must attach your submission file to the message. Mutiple files must be submitted as a zip archive. You must DM CodeWarsBot to use this command.
