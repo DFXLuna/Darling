@@ -12,9 +12,15 @@
   - Run src/main.py
     - On ubuntu 20.04 `python3 src/main.py`
 
-## TODO(priority order): 
+## TODO(priority order):
+- Check passes of particular problem
+- Check team score
 - Event start time
   - Could use cog loading and unload to facilitate this
 - Async reg flush
 - optimize mutex locks
 - optimize multiple awaits to concurrent
+
+
+## Bugs
+- (Unconfirmed) Issue claiming by uuid the last problem in list

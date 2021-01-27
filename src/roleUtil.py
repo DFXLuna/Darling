@@ -18,7 +18,7 @@ async def IsJudgeById(bot, id):
 async def GetUserById(bot, id):
     member = bot.get_user(id)
     if member == None:
-        member = await bot.fetch_member(id)
+        member = await bot.fetch_user(id)
     return member
 
 async def IsValidJudgeContext(ctx, bot):
