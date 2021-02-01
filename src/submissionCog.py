@@ -96,9 +96,9 @@ class SubmissionCog(commands.Cog):
 
         teamNumber = await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author))
         entries = await self.submissionDb.GetTeamSubmissions(teamNumber)
-        displayString = f"Team #{teamNumber} Submissions:\n"
+        displayString = f"Team #**{teamNumber}** Submissions:\n"
         for entry in entries:
-            displayString += f'> Problem: {entry.GetProblemNumber()}, status: {entry.GetGradeStatus()}\n'
+            displayString += f'> Problem: **{entry.GetProblemNumber()}**, status: **{entry.GetGradeStatus()}**\n'
 
         await ctx.send(displayString)
 
