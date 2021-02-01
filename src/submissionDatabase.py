@@ -8,11 +8,15 @@ import asyncio
 class submissionDatabase:
     
     def __init__(self, dbfile, logger):
+        self.num_problems = 31
         self.entries = {}
         self.dbfile = dbfile
         self.logger = logger
         self.mutex = asyncio.Lock()
         self.callbacks = []
+        self.passes = [0] * self.num_problems
+        self.fails = [0] * self.num_problems
+        #self.pointValues = []
 
         if os.path.isfile(dbfile):
             self.logger.Log("Loading submission db from " + dbfile)
@@ -37,6 +41,40 @@ class submissionDatabase:
         async with self.mutex:
             self.logger.Log('GetAllSubmissions')
             return list(self.entries.values())
+    
+    #returns the userID, teamnumber and problem number of the passed submission
+    async def PassSubmission(self, uuid):
+        userId = None
+        teamNumber = None
+        problemNumber = None
+        async with self.mutex:
+            self.logger.Log(f'Pass {uuid}')
+            entry = self.entries[uuid]
+            self.passes[entry.GetProblemNumber()] += 1
+            entry.Pass()
+            userId = entry.GetUserId()
+            teamNumber = entry.GetTeamNumber()
+            problemNumber = entry.GetProblemNumber()
+        await self.AsyncFlush()
+        #increment team's score
+        return (userId, teamNumber, problemNumber)
+
+    #returns the userID, teamnumber and problem number of the failed submission
+    async def FailSubmission(self, uuid):
+        userId = None
+        teamNumber = None
+        problemNumber = None
+        async with self.mutex:
+            self.logger.Log(f'fail {uuid}')
+            entry = self.entries[uuid]
+            self.fails[entry.GetProblemNumber()] += 1
+            entry.Fail()
+            userId = entry.GetUserId()
+            teamNumber = entry.GetTeamNumber()
+            problemNumber = entry.GetProblemNumber()
+        await self.AsyncFlush()
+        #increment team's score
+        return (userId, teamNumber, problemNumber)
 
     async def AddSubmission(self, submitter, teamNumber, problemNumber, url, userId):
         async with self.mutex:

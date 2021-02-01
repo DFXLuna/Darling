@@ -12,6 +12,10 @@
   - Run src/main.py
     - On ubuntu 20.04 `python3 src/main.py`
 
+# Before Contest
+- Set problem number in submission database
+- Set point values in teamScores
+
 ## TODO(priority order):
 - Check passes of particular problem
 - Check team score
