@@ -1,3 +1,4 @@
+
 import discord
 import keyUtil
 import roleUtil
@@ -130,11 +131,10 @@ class GradingCog(commands.Cog):
             del self.ungradedSubmissions[uuid]
         ## UNLOCK MUTEX
 
-        submission = await self.submissionDb.GetSubmission(uuid)
-        submission.Pass()
-        await self.submissionDb.AsyncFlush()
-        user = await roleUtil.GetUserById(self.bot, submission.GetUserId())
-        await user.send(f"Team #{submission.GetTeamNumber()}'s submission for problem {submission.GetProblemNumber()} passed!")
+        userId, teamNumber, problemNumber = await self.submissionDb.PassSubmission(uuid)
+        user = await roleUtil.GetUserById(self.bot, userId)
+        await ctx.send(f'Problem #{problemNumber} from team #{teamNumber} **passed** successfully!')
+        await user.send(f"Team #{teamNumber}'s submission for problem {problemNumber} passed!")
 
     @commands.command()
     async def fail(self, ctx, reason):
@@ -156,12 +156,10 @@ class GradingCog(commands.Cog):
             del self.ungradedSubmissions[uuid]
         ## UNLOCK MUTEX
 
-        submission = await self.submissionDb.GetSubmission(uuid)
-        submission.Fail()
-        await self.submissionDb.AsyncFlush()
-        user = await roleUtil.GetUserById(self.bot, submission.GetUserId())
-        await ctx.send(f'Problem #{submission.GetProblemNumber()} from team #{submission.GetTeamNumber()} failed successfully!')
-        await user.send(f"Team #{submission.GetTeamNumber()}'s submission for problem {submission.GetProblemNumber()} failed. Judge note: {reason}")
+        userId, teamNumber, problemNumber = await self.submissionDb.PassSubmission(uuid)
+        user = await roleUtil.GetUserById(self.bot, userId)
+        await ctx.send(f'Problem #{problemNumber} from team #{teamNumber} **failed** successfully!')
+        await user.send(f"Team #{teamNumber}'s submission for problem {problemNumber} failed. Judge note: {reason}")
 
     @commands.command()
     async def quick_fail(self, ctx, number, note=''):
