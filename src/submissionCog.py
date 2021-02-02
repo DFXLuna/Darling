@@ -116,6 +116,28 @@ class SubmissionCog(commands.Cog):
         displayString += '```'
         await ctx.send(displayString)
 
+    @commands.command()
+    async def delete_submission(self, ctx, uuid):
+        self.logger.Log(f'delete_submission')
+
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+        name = keyUtil.KeyFromAuthor(ctx.author)
+
+        if name != 'DFXLuna#4329' and name != 'MattGrant117#1885':
+            await ctx.send("You are not authorized to use this command. Contact Matt Grant if you think there is an error.")
+            return
+
+        if await self.submissionDb.DeleteSubmission(uuid):
+            grading = self.bot.get_cog('GradingCog')
+            if grading is not None:
+                await grading.DeleteSubmission(uuid)
+            else:
+                self.logger.Log("Grading was none")
+            await ctx.send(f'Successfully deleted submission {uuid}')
+        else:
+            await ctx.send(f'Could not delete {uuid}')
+        return
 
     async def VerifyFileName(self, fileName, problemNumber):
         result = re.match('^prob([0-9][0-9])\.(py2|py3|java|js|c|cpp|zip)$', fileName)

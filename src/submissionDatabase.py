@@ -168,3 +168,10 @@ class submissionDatabase:
     async def GetFails(self):
         return self.fails
 
+    async def DeleteSubmission(self, uuid):
+        async with self.mutex:
+            if uuid in self.entries.keys():
+                del self.entries[uuid]
+                return True
+        return False
+
