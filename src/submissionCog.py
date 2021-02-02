@@ -102,6 +102,21 @@ class SubmissionCog(commands.Cog):
 
         await ctx.send(displayString)
 
+    @commands.command()
+    async def scoreboard(self, ctx):
+        passes = await self.submissionDb.GetPasses()
+        fails = await self.submissionDb.GetFails()
+
+        displayString = '```\nProblem | Passes | Fails | %\n---------------------------------\n'
+        for i in range(0, len(passes)):
+            if passes[i] + fails[i] != 0:
+                displayString += f'{i:02}      | {passes[i]:02}     | {fails[i]:02}    | {(passes[i]/(passes[i] + fails[i])) * 100}%\n'
+            else:
+                displayString += f'{i:02}      | {passes[i]:02}     | {fails[i]:02}    | 0.0%\n'
+        displayString += '```'
+        await ctx.send(displayString)
+
+
     async def VerifyFileName(self, fileName, problemNumber):
         result = re.match('^prob([0-9][0-9])\.(py2|py3|java|js|c|cpp|zip)$', fileName)
         if result == None:

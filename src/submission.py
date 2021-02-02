@@ -45,3 +45,9 @@ class Submission:
     
     def IsGraded(self):
         return self.gradeStatus != 'ungraded'
+
+    def IsPass(self):
+        return self.gradeStatus == 'pass'
+
+    def IsFail(self):
+        return self.gradeStatus == 'fail'

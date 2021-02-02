@@ -28,6 +28,11 @@ class submissionDatabase:
                                                 int(row['problemNumber']), row['url'],  int(row['userId']),
                                                 row['gradeStatus'], row['uuid'])
                     entriesLoaded += 1
+                for entry in self.entries.values():
+                    if entry.IsPass():
+                        self.passes[entry.GetProblemNumber()] += 1
+                    else:
+                        self.fails[entry.GetProblemNumber()] += 1
             self.logger.Log(f'Loaded {entriesLoaded} submission entries')
         else:
             self.logger.Log('Did not load submission db')
@@ -41,7 +46,7 @@ class submissionDatabase:
         async with self.mutex:
             self.logger.Log('GetAllSubmissions')
             return list(self.entries.values())
-    
+
     #returns the userID, teamnumber and problem number of the passed submission
     async def PassSubmission(self, uuid):
         userId = None
@@ -82,7 +87,7 @@ class submissionDatabase:
             self.entries[toAdd.uuid] = toAdd
             self.logger.Log(f'AddSubmission {toAdd.GetUuid()}, {submitter}, {teamNumber}, {problemNumber}, {userId}')
             await self.AddSubmissionCallbacks(toAdd)
-            
+
     async def AddSubmissionCallbacks(self, submission):
         preparedFunctions = []
         for callback in self.callbacks:
@@ -157,4 +162,10 @@ class submissionDatabase:
                 if entry.GetTeamNumber() == teamNumber:
                     submissions.append(entry)
             return submissions
+
+    async def GetPasses(self):
+        return self.passes
+
+    async def GetFails(self):
+        return self.fails
 
