@@ -13,12 +13,13 @@
     - On ubuntu 20.04 `python3 src/main.py`
 
 # Before Contest
-- Set problem number in submission database
+- Set problem number in submission database and scoringCog
 - Set point values in teamScores
 
 ## TODO(priority order):
-- Check passes of particular problem
-- Check team score
+- point_values
+- change_point_value
+- delete_submission
 - Event start time
   - Could use cog loading and unload to facilitate this
 - Async reg flush
