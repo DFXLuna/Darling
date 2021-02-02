@@ -17,9 +17,7 @@
 - Set point values in teamScores
 
 ## TODO(priority order):
-- point_values
-- change_point_value
-- delete_submission
+- scoring
 - Event start time
   - Could use cog loading and unload to facilitate this
 - Async reg flush
@@ -28,4 +26,3 @@
 
 
 ## Bugs
-- (Unconfirmed) Issue claiming by uuid the last problem in list

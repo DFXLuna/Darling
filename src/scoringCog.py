@@ -43,3 +43,19 @@ class ScoringCog(commands.Cog):
             displayString += f'{i:02}      | {self.pointValues[i]}\n'
         displayString += '```'
         await ctx.send(displayString)
+
+    @commands.command()
+    async def change_point_value(self, ctx, problemNumber, pointValue):
+        'Change the point value of a given problem. This only persists through the current session.'
+        self.logger.Log(f'change_point_value')
+
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+        name = keyUtil.KeyFromAuthor(ctx.author)
+
+        if name != 'DFXLuna#4329' and name != 'MattGrant117#1885':
+            await ctx.send("You are not authorized to use this command. Contact Matt Grant if you think there is an error.")
+            return
+
+        self.pointValues[int(problemNumber)] = int(pointValue)
+        await ctx.send(f'Point value of problem #**{problemNumber}** is now **{self.pointValues[int(problemNumber)]}**')

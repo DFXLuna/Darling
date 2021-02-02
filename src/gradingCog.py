@@ -186,3 +186,7 @@ class GradingCog(commands.Cog):
             output += f'> #**{i}**: {self.failureReasons[i]}\n'
 
         await ctx.send(output)
+
+    async def DeleteSubmission(self, uuid):
+        if uuid in self.ungradedSubmissions.keys():
+            del self.ungradedSubmissions[uuid]

@@ -9,7 +9,7 @@ class Submission:
         self.userId = userId
         self.gradeStatus = gradeStatus
         if uuid is None:
-            self.uuid = u.uuid4()
+            self.uuid = str(u.uuid4())
         else:
             self.uuid = uuid
 
