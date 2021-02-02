@@ -16,7 +16,6 @@ class submissionDatabase:
         self.callbacks = []
         self.passes = [0] * self.num_problems
         self.fails = [0] * self.num_problems
-        #self.pointValues = []
 
         if os.path.isfile(dbfile):
             self.logger.Log("Loading submission db from " + dbfile)

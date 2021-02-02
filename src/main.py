@@ -6,6 +6,7 @@ import registrationCog
 import submissionCog
 import adminCog
 import gradingCog
+import scoringCog
 import helpCog
 import os
 import sys
@@ -36,6 +37,7 @@ else:
     bot.add_cog(submissionCog.SubmissionCog(bot, log, reg, sub))
     bot.add_cog(gradingCog.GradingCog(sub, bot, log))
     bot.add_cog(helpCog.HelpCog(bot, log))
+    bot.add_cog(scoringCog.ScoringCog(sub, reg, bot, log))
     #bot.add_cog(adminCog.AdminCog())
     try:
         bot.run(token)
