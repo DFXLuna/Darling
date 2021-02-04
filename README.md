@@ -13,12 +13,11 @@
     - On ubuntu 20.04 `python3 src/main.py`
 
 # Before Contest
-- Set problem number in submission database and scoringCog
+- Set problem number in numProblems
 - Set point values in teamScores
+- Clear registration and submission db
 
 ## TODO(priority order):
-- open_submissions
-- close_submissions
 - Async reg flush
 - optimize mutex locks
 - optimize multiple awaits to concurrent

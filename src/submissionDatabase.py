@@ -1,4 +1,5 @@
 import datetime
+import numProblems
 import logger
 import csv
 import submission as s
@@ -8,7 +9,7 @@ import asyncio
 class submissionDatabase:
     
     def __init__(self, dbfile, logger):
-        self.num_problems = 31
+        self.num_problems = numProblems.num_problems
         self.entries = {}
         self.dbfile = dbfile
         self.logger = logger

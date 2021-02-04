@@ -1,11 +1,14 @@
 import discord
 import keyUtil
 import roleUtil
+import numProblems
 import re
+import datetime
 from discord.ext import commands
 
 class SubmissionCog(commands.Cog):
     def __init__(self, bot, logger, registrationDb, submissionDb):
+        self.num_problems = numProblems.num_problems
         self.bot = bot
         self.logger = logger
         self.registrationDb = registrationDb
@@ -21,8 +24,12 @@ class SubmissionCog(commands.Cog):
             submitter = keyUtil.KeyFromAuthor(ctx.author)
             teamNumber = await self.registrationDb.GetEntry(submitter)
 
-            if self.submissionsOpen is False:
+            if self.submissionsOpen is False and int(problemNumber) > 1:
                 await ctx.send(f'Submissions are not open, please wait for the event to start.')
+                return
+
+            if int(problemNumber) < 0 or int(problemNumber) > self.num_problems:
+                await ctx.send(f'Problem number must be greater than 0 and less than {self.num_problems}')
                 return
 
             if teamNumber is None:
@@ -144,7 +151,7 @@ class SubmissionCog(commands.Cog):
             await ctx.send(f'Could not delete {uuid}')
         return
 
-     @commands.command()
+    @commands.command()
     async def open_submissions(self, ctx):
         'Open submissions and begin the contest'
         self.logger.Log(f'open_submissions')
@@ -161,7 +168,7 @@ class SubmissionCog(commands.Cog):
         ts = datetime.datetime.now()
         await ctx.send(f'Submissions are now open. Current time MTN is [{ts}]')
 
-     @commands.command()
+    @commands.command()
     async def close_submissions(self, ctx):
         'Close submissions and end the contest'
         self.logger.Log(f'close_submissions')
