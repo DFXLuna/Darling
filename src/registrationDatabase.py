@@ -39,6 +39,14 @@ class RegistrationDatabase:
     async def GetAllRegistrations(self):
         async with self.mutex:
             return self.entries
+    
+    async def GetAllTeamNumbers(self):
+        teams = []
+        async with self.mutex:
+            for entry in self.entries.values():
+                if entry not in teams:
+                    teams.append(entry)
+        return teams
 
     def Flush(self):
         with open(self.dbfile, 'w') as f:

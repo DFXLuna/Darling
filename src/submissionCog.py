@@ -10,6 +10,7 @@ class SubmissionCog(commands.Cog):
         self.logger = logger
         self.registrationDb = registrationDb
         self.submissionDb = submissionDb
+        self.submissionsOpen = False
 
     @commands.command()
     async def submit(self, ctx, problemNumber):
@@ -19,6 +20,10 @@ class SubmissionCog(commands.Cog):
 
             submitter = keyUtil.KeyFromAuthor(ctx.author)
             teamNumber = await self.registrationDb.GetEntry(submitter)
+
+            if self.submissionsOpen is False:
+                await ctx.send(f'Submissions are not open, please wait for the event to start.')
+                return
 
             if teamNumber is None:
                 await ctx.send(f'{submitter} is not registered to a team. Please use the `$register <teamNumber>` command to register yourself to your team.')
@@ -138,6 +143,41 @@ class SubmissionCog(commands.Cog):
         else:
             await ctx.send(f'Could not delete {uuid}')
         return
+
+     @commands.command()
+    async def open_submissions(self, ctx):
+        'Open submissions and begin the contest'
+        self.logger.Log(f'open_submissions')
+
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+        name = keyUtil.KeyFromAuthor(ctx.author)
+
+        if name != 'DFXLuna#4329' and name != 'MattGrant117#1885':
+            await ctx.send("You are not authorized to use this command. Contact Matt Grant if you think there is an error.")
+            return
+
+        self.submissionsOpen = True
+        ts = datetime.datetime.now()
+        await ctx.send(f'Submissions are now open. Current time MTN is [{ts}]')
+
+     @commands.command()
+    async def close_submissions(self, ctx):
+        'Close submissions and end the contest'
+        self.logger.Log(f'close_submissions')
+
+        if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
+            return
+        name = keyUtil.KeyFromAuthor(ctx.author)
+
+        if name != 'DFXLuna#4329' and name != 'MattGrant117#1885':
+            await ctx.send("You are not authorized to use this command. Contact Matt Grant if you think there is an error.")
+            return
+
+        self.submissionsOpen = False
+
+        ts = datetime.datetime.now()
+        await ctx.send(f'Submissions are now closed. Current time MTN is [{ts}]')
 
     async def VerifyFileName(self, fileName, problemNumber):
         result = re.match('^prob([0-9][0-9])\.(py2|py3|java|js|c|cpp|zip)$', fileName)
