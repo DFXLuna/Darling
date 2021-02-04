@@ -20,13 +20,13 @@ class ScoringCog(commands.Cog):
         self.logger.Log('team_score')
         if not await roleUtil.IsValidDMContext(ctx, self.bot):
             return
-        submissions = await self.submissionDb.GetTeamSubmissions(await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author)))
-        score = 0
+        
+        score, passedProblems = await self.GetTeamScore(await self.registrationDb.GetEntry(keyUtil.KeyFromAuthor(ctx.author)))
+       
         displayString = f'Passed problems: '
-        for entry in submissions:
-            if entry.IsPass():
-                score += self.pointValues[entry.GetProblemNumber()]
-                displayString += f'{entry.GetProblemNumber():02}, '
+        for entry in passedProblems:
+            displayString += f'{entry:02}, '
+        
         displayString += f'\nScore: **{score}**'
         await ctx.send(displayString)
     
@@ -59,3 +59,23 @@ class ScoringCog(commands.Cog):
 
         self.pointValues[int(problemNumber)] = int(pointValue)
         await ctx.send(f'Point value of problem #**{problemNumber}** is now **{self.pointValues[int(problemNumber)]}**')
+
+    @commands.command()
+    async def event_scores(self, ctx, problemNumber, pointValue):
+        self.logger.Log('event_scores')
+
+        if not await roleUtil.IsValidDMContext(ctx, self.bot):
+            return
+
+    # returns (score, passed problem numbers)
+    async def GetTeamScore(self, team):
+        score = 0
+        passedProblems = []
+        submissions = await self.submissionDb.GetTeamSubmissions(team)
+
+        for entry in submissions:
+            if entry.IsPass():
+                score += self.pointValues[entry.GetProblemNumber()]
+                passedProblems.append(entry.GetProblemNumber())
+        return (score, passedProblems)
+
