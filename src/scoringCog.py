@@ -61,11 +61,23 @@ class ScoringCog(commands.Cog):
         await ctx.send(f'Point value of problem #**{problemNumber}** is now **{self.pointValues[int(problemNumber)]}**')
 
     @commands.command()
-    async def event_scores(self, ctx, problemNumber, pointValue):
+    async def event_scores(self, ctx):
         self.logger.Log('event_scores')
 
         if not await roleUtil.IsValidDMContext(ctx, self.bot):
             return
+
+        teamScores = {}
+        for team in await self.registrationDb.GetAllTeamNumbers():
+            teamScores[team] = await self.GetTeamScore(team)
+
+        sortedEntries = sorted(teamScores.items(), key=lambda item: item[1][0], reverse=True)
+
+        displayString = f'```\nTeam | Score | Problems\n'
+        for entry in sortedEntries:
+            displayString += f'{entry[0]:04} | {entry[1][0]: 03}   | {entry[1][1]}\n'
+        displayString += '```'
+        await ctx.send(displayString)
 
     # returns (score, passed problem numbers)
     async def GetTeamScore(self, team):

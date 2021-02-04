@@ -2,7 +2,7 @@
 
 
 ## Build requirements
-  - python  >= 3.5
+  - python  >= 3.7
   - discord.py `pip install discord.py`
 
 ## To run
@@ -17,12 +17,10 @@
 - Set point values in teamScores
 
 ## TODO(priority order):
-- scoring
-- Event start time
-  - Could use cog loading and unload to facilitate this
+- open_submissions
+- close_submissions
 - Async reg flush
 - optimize mutex locks
 - optimize multiple awaits to concurrent
-
 
 ## Bugs
