@@ -1,4 +1,4 @@
-
+import numProblems
 import discord
 import keyUtil
 import roleUtil
@@ -7,7 +7,7 @@ from discord.ext import commands
 
 class ScoringCog(commands.Cog):
     def __init__(self, submissionDb, registrationDb, bot, logger):
-        self.num_problems = 31
+        self.num_problems = numProblems.num_problems
         self.submissionDb = submissionDb
         self.registrationDb = registrationDb
         self.bot = bot
