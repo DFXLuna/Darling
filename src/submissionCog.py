@@ -4,6 +4,7 @@ import roleUtil
 import numProblems
 import re
 import datetime
+import asyncio
 from discord.ext import commands
 
 class SubmissionCog(commands.Cog):
@@ -18,52 +19,54 @@ class SubmissionCog(commands.Cog):
     @commands.command()
     async def submit(self, ctx, problemNumber):
         'Submit a solution to the given problem number. You must attach your submission file to the message. Mutiple files must be submitted as a zip archive. You must DM CodeWarsBot to use this command Syntax: `$submit <problemNumber>`'
-        if isinstance(ctx.channel, discord.channel.DMChannel) and ctx.author != self.bot.user:
-            self.logger.Log(f'submit {ctx.author} {problemNumber}')
+        self.logger.Log(f'submit {ctx.author} {problemNumber}')
+        
+        if not await roleUtil.IsValidDMContext(ctx, self.bot):
+            return
 
-            submitter = keyUtil.KeyFromAuthor(ctx.author)
-            teamNumber = await self.registrationDb.GetEntry(submitter)
+        submitter = keyUtil.KeyFromAuthor(ctx.author)
+        teamNumber = await self.registrationDb.GetEntry(submitter)
 
-            if self.submissionsOpen is False and int(problemNumber) > 1:
-                await ctx.send(f'Submissions are not open, please wait for the event to start.')
-                return
+        if self.submissionsOpen is False and int(problemNumber) > 1:
+            await ctx.send(f'Submissions are not open, please wait for the event to start.')
+            return
 
-            if int(problemNumber) < 0 or int(problemNumber) > self.num_problems:
-                await ctx.send(f'Problem number must be greater than 0 and less than {self.num_problems}')
-                return
+        if int(problemNumber) < 0 or int(problemNumber) > self.num_problems:
+            await ctx.send(f'Problem number must be greater than 0 and less than {self.num_problems}')
+            return
 
-            if teamNumber is None:
-                await ctx.send(f'{submitter} is not registered to a team. Please use the `$register <teamNumber>` command to register yourself to your team.')
-                return
+        if teamNumber is None:
+            await ctx.send(f'{submitter} is not registered to a team. Please use the `$register <teamNumber>` command to register yourself to your team.')
+            return
 
-            if len(ctx.message.attachments) == 0:
-                await ctx.send(f'No attachment found, please attach your submission file to the command message. Multiple files may be submitted as a zip archive.')
-                return
+        if len(ctx.message.attachments) == 0:
+            await ctx.send(f'No attachment found, please attach your submission file to the command message. Multiple files may be submitted as a zip archive.')
+            return
 
-            if len(ctx.message.attachments) > 1:
-                await ctx.send(f'More than one attachment detected. Multiple files must be submitted as a zip archive.')
-                return
+        if len(ctx.message.attachments) > 1:
+            await ctx.send(f'More than one attachment detected. Multiple files must be submitted as a zip archive.')
+            return
 
-            if await self.submissionDb.SubmissionAlreadyInProgress(teamNumber, int(problemNumber)):
-                await ctx.send(f'Team #{teamNumber} has already submitted problem {problemNumber}. Please wait for the judges to judge your submission before resubmitting.')
-                return
+        if await self.submissionDb.SubmissionAlreadyInProgress(teamNumber, int(problemNumber)):
+            await ctx.send(f'Team #{teamNumber} has already submitted problem {problemNumber}. Please wait for the judges to judge your submission before resubmitting.')
+            return
 
-            if not await self.VerifyFileName(ctx.message.attachments[0].filename, int(problemNumber)):
-                await ctx.send(f'Submission filename is incorrect, filename format is `probXX.ext` where `XX` is the problem number with a leading zero for single digit problem numbers and `ext` is one of `py2` `py3` `java` `js` `c` `cpp` `zip`. Additionally, make sure the problem number of the attachment matches the one in the command.')
-                return
+        if not await self.VerifyFileName(ctx.message.attachments[0].filename, int(problemNumber)):
+            await ctx.send(f'Submission filename is incorrect, filename format is `probXX.ext` where `XX` is the problem number with a leading zero for single digit problem numbers and `ext` is one of `py2` `py3` `java` `js` `c` `cpp` `zip`. Additionally, make sure the problem number of the attachment matches the one in the command.')
+            return
 
-            await ctx.send(f'Submission of problem {problemNumber} for team #{teamNumber} received. It has been forwarded to the judges for grading.')
+        await asyncio.gather(
+            self.submissionDb.AddSubmission(keyUtil.KeyFromAuthor(ctx.author), teamNumber, int(problemNumber), ctx.message.attachments[0].url, ctx.author.id),
+            ctx.send(f'Submission of problem {problemNumber} for team #{teamNumber} received. It has been forwarded to the judges for grading.'),
+        )
 
-            await self.submissionDb.AddSubmission(keyUtil.KeyFromAuthor(ctx.author), teamNumber, int(problemNumber), ctx.message.attachments[0].url, ctx.author.id)
-
-            for attachment in ctx.message.attachments:
-                await ctx.send(f'Attachment receipt:\nID {attachment.id}\nSize: {attachment.size}\nFilename: {attachment.filename}\nURL: {attachment.url}')
-        else:
-            await ctx.send(f'You must direct message CodeWarsBot to use that command')
+        for attachment in ctx.message.attachments:
+            await ctx.send(f'Attachment receipt:\nID {attachment.id}\nSize: {attachment.size}\nFilename: {attachment.filename}\nURL: {attachment.url}')
 
     @commands.command()
     async def list_submissions(self, ctx):
         'Lists all submissions currently in the database'
+        self.logger.Log('list_submissions')
         if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
             return
 
@@ -77,6 +80,7 @@ class SubmissionCog(commands.Cog):
     @commands.command()
     async def list_uuids(self, ctx):
         'Lists all submissions with uuids currently in the database'
+        self.logger.Log('list_uuids')
         if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
             return
 
@@ -90,6 +94,7 @@ class SubmissionCog(commands.Cog):
     @commands.command()
     async def list_ungraded_submissions(self, ctx):
         'Lists all ungraded submissions currently in the database'
+        self.logger.Log('list_ungraded_submissions')
         if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
             return
 
@@ -103,6 +108,7 @@ class SubmissionCog(commands.Cog):
     @commands.command()
     async def list_team_submissions(self, ctx):
         'Lists all submissions for a team'
+        self.logger.Log('list_team_submissions')
         if not await roleUtil.IsValidDMContext(ctx, self.bot):
             return
 
@@ -116,6 +122,7 @@ class SubmissionCog(commands.Cog):
 
     @commands.command()
     async def scoreboard(self, ctx):
+        self.logger.Log('scoreboard')
         passes = await self.submissionDb.GetPasses()
         fails = await self.submissionDb.GetFails()
 

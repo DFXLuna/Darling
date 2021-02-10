@@ -22,8 +22,7 @@
 - Clear registration and submission db
 
 ## TODO(priority order):
-- Async reg flush
+- fix register to disallow multiple registrations
 - optimize mutex locks
-- optimize multiple awaits to concurrent
 
 ## Bugs

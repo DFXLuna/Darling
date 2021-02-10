@@ -47,7 +47,7 @@ class ScoringCog(commands.Cog):
     @commands.command()
     async def change_point_value(self, ctx, problemNumber, pointValue):
         'Change the point value of a given problem. This only persists through the current session.'
-        self.logger.Log(f'change_point_value')
+        self.logger.Log(f'change_point_value {problemNumber} {pointValue}')
 
         if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
             return
