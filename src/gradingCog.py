@@ -29,16 +29,17 @@ class GradingCog(commands.Cog):
                 for uuid in await self.submissionDb.GetUngradedSubmissionUuids():
                     self.ungradedSubmissions[uuid] = 'unclaimed'
                     count += 1
-                self.logger.Log(f'Loaded {count} ungraded entries')
+            self.logger.Log(f'Loaded {count} ungraded entries')
             await self.gradingChannel.send(f'Server has started, loaded {count} ungraded entries. Any previous claims have been invalidated.')
 
 
     async def OnAddSubmission(self, submission):
         self.logger.Log(f'OnAddSubmission {submission.GetUuid()}')
+        ungradedSubmissions = 0
         async with self.mutex:
-            if not submission.IsGraded():
-                self.ungradedSubmissions[submission.GetUuid()] = 'unclaimed'
-                await self.gradingChannel.send(f'New submission received, there are {len(self.ungradedSubmissions)} open submissions. Claim one with the `$claim` command')
+            self.ungradedSubmissions[submission.GetUuid()] = 'unclaimed'
+            ungradedSubmissions = len(self.ungradedSubmissions)
+        await self.gradingChannel.send(f'New submission received, there are {ungradedSubmissions} open submissions. Claim one with the `$claim` command')
 
     @commands.command()
     async def unclaim(self, ctx):
@@ -74,12 +75,11 @@ class GradingCog(commands.Cog):
         uuid = ''
         async with self.mutex:
             if author in self.currentSubmissionGraders:
-                currentUuid = ''
                 for k, v in self.ungradedSubmissions.items():
                     if v == author:
-                        currentUuid = k
+                        uuid = k
                         break
-                await ctx.send(f'You have already checked out problem {currentUuid}. Please `$pass`, `$fail`, `$quick_fail` or `$unclaim` that problem before claiming a new one.')
+                await ctx.send(f'You have already checked out problem {uuid}. Please `$pass`, `$fail`, `$quick_fail` or `$unclaim` that problem before claiming a new one.')
                 return
             if requestuuid == None:
                 for k, v in self.ungradedSubmissions.items():
