@@ -62,6 +62,7 @@ class ScoringCog(commands.Cog):
 
     @commands.command()
     async def event_scores(self, ctx):
+        'Shows the current scores for all teams.'
         self.logger.Log('event_scores')
 
         if not await roleUtil.IsValidDMContext(ctx, self.bot):
