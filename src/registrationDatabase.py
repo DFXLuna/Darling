@@ -2,6 +2,7 @@ import datetime
 import logger
 import csv
 import os.path
+import asyncio
 
 class RegistrationDatabase:
     
@@ -9,6 +10,7 @@ class RegistrationDatabase:
         self.entries = {}
         self.dbfile = dbfile
         self.logger = logger
+        self.mutex = asyncio.Lock()
 
         if os.path.isfile(dbfile):
             self.logger.Log("Loading registration from " + dbfile)
@@ -16,28 +18,57 @@ class RegistrationDatabase:
                 reader = csv.DictReader(f)
                 entriesLoaded = 0
                 for row in reader:
-                    self.entries[row['user']] = row['team']
+                    self.entries[row['user']] = int(row['team'])
                     entriesLoaded += 1
             self.logger.Log(f"Loaded {entriesLoaded} registration entries")
         else:
             self.logger.Log("Did not load registration")
 
-    def GetEntry(self, key):
-        return self.entries.get(key)
+    async def GetEntry(self, key):
+        async with self.mutex:
+            return self.entries.get(key)
 
-    def Register(self, name, teamNumber):
-        self.entries[name] = teamNumber
+    async def Register(self, name, teamNumber):
+        async with self.mutex:
+            self.entries[name] = teamNumber
 
-    def Unregister(self, name):
-        self.entries.pop(name)
+    async def Unregister(self, name):
+        async with self.mutex:
+            self.entries.pop(name)
+    
+    async def GetAllRegistrations(self):
+        async with self.mutex:
+            return self.entries
+    
+    async def GetAllTeamNumbers(self):
+        teams = []
+        async with self.mutex:
+            for entry in self.entries.values():
+                if entry not in teams:
+                    teams.append(entry)
+        return teams
+
+    async def AsyncFlush(self):
+        async with self.mutex:
+            with open(self.dbfile, 'w') as f:
+                fieldnames = ['user', 'team']
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+
+                count = 0
+                for k,v in self.entries.items():
+                    writer.writerow( {'user': k, 'team': v} )
+                    count += 1
+        self.logger.Log(f'Flushed {count} registrations to disk')
 
     def Flush(self):
-        self.logger.Log("Flushing registration to disk")
         with open(self.dbfile, 'w') as f:
             fieldnames = ['user', 'team']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
 
+            count = 0
             for k,v in self.entries.items():
                 writer.writerow( {'user': k, 'team': v} )
-        self.logger.Log("Finished flushing")
+                count += 1
+        self.logger.Log(f'Flushed {count} registrations to disk')
