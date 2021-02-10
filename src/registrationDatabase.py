@@ -48,6 +48,19 @@ class RegistrationDatabase:
                     teams.append(entry)
         return teams
 
+    async def AsyncFlush(self):
+        async with self.mutex:
+            with open(self.dbfile, 'w') as f:
+                fieldnames = ['user', 'team']
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+
+                count = 0
+                for k,v in self.entries.items():
+                    writer.writerow( {'user': k, 'team': v} )
+                    count += 1
+        self.logger.Log(f'Flushed {count} registrations to disk')
+
     def Flush(self):
         with open(self.dbfile, 'w') as f:
             fieldnames = ['user', 'team']

@@ -106,9 +106,8 @@ class GradingCog(commands.Cog):
 
         await ctx.send(f'{author} claimed {uuid}, you will receive a direct message with the details.')
         submission = await self.submissionDb.GetSubmission(uuid)
-
-        await ctx.author.send(f'Submission details:\nProblem Number: {submission.GetProblemNumber()}\nTeam Number: {submission.GetTeamNumber()}\nURL: {submission.GetUrl()}\nUUID: {submission.GetUuid()}\n')
-        await ctx.author.send(f'You may `$pass`, `$fail`, `$quick_fail` or `$unclaim` this problem\n----------------------------------------------------------------------------------------------------------------------')
+        
+        await ctx.author.send(f'Submission details:\nProblem Number: {submission.GetProblemNumber()}\nTeam Number: {submission.GetTeamNumber()}\nURL: {submission.GetUrl()}\nUUID: {submission.GetUuid()}\nYou may `$pass`, `$fail`, `$quick_fail` or `$unclaim` this problem\n----------------------------------------------------------------------------------------------------------------------\n'),
 
     #pass is a keyword in python, hence _pass
     @commands.command(name="pass")
@@ -133,13 +132,16 @@ class GradingCog(commands.Cog):
 
         userId, teamNumber, problemNumber = await self.submissionDb.PassSubmission(uuid)
         user = await roleUtil.GetUserById(self.bot, userId)
-        await ctx.send(f'Problem #{problemNumber} from team #{teamNumber} **passed** successfully!')
-        await user.send(f"Team #{teamNumber}'s submission for problem {problemNumber} passed!")
+
+        await asyncio.gather(
+            ctx.send(f'Problem #{problemNumber} from team #{teamNumber} **passed** successfully!'),
+            user.send(f"Team #{teamNumber}'s submission for problem {problemNumber} passed!")
+        )
 
     @commands.command()
     async def fail(self, ctx, reason):
         'Fails your currently claimed problem and send the submitting team the provided quote wrapped message. Your message must be surrounded by quotes. This must be used in your direct messages OR the judge-grading channel. '
-        self.logger.Log('fail')
+        self.logger.Log(f'fail {reason}')
         if not await roleUtil.IsValidJudgeContext(ctx, self.bot):
             return
 
@@ -158,8 +160,11 @@ class GradingCog(commands.Cog):
 
         userId, teamNumber, problemNumber = await self.submissionDb.PassSubmission(uuid)
         user = await roleUtil.GetUserById(self.bot, userId)
-        await ctx.send(f'Problem #{problemNumber} from team #{teamNumber} **failed** successfully!')
-        await user.send(f"Team #{teamNumber}'s submission for problem {problemNumber} failed. Judge note: {reason}")
+
+        await asyncio.gather(
+            ctx.send(f'Problem #{problemNumber} from team #{teamNumber} **failed** successfully!'),
+            user.send(f"Team #{teamNumber}'s submission for problem {problemNumber} failed. Judge note: {reason}")
+        )
 
     @commands.command()
     async def quick_fail(self, ctx, number, note=''):
