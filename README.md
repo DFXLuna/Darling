@@ -22,6 +22,5 @@
 - Clear registration and submission db
 
 ## TODO(priority order):
-- optimize mutex locks
 
 ## Bugs
