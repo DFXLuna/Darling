@@ -22,5 +22,6 @@
 - Clear registration and submission db
 
 ## TODO(priority order):
-
+- Communicate event start and stop in general chat
+- Add failure reason to problem
 ## Bugs
