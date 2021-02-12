@@ -49,7 +49,8 @@ Judge commands:
 > `$scoreboard` List's the pass / fail rate of each problem.
 
 > `$point_values` List all problems and their point values.
-
+"""
+        displayString3 = f"""
 **Admin**:
 > `change_point_value <problemNumber> <pointValue>` Change the point value of a given problem. This only persists through the current session. Only Matt Grant can use this command. Please DM him if you need to use this command.
 
@@ -69,7 +70,8 @@ Judge commands:
 > `$help` Shows the default unhelpful message
 """
         await ctx.send(displayString1 + '\n')
-        await ctx.send(displayString2)
+        await ctx.send(displayString2 + '\n')
+        await ctx.send(displayString3 + '\n')
         return
 
 
