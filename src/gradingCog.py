@@ -158,7 +158,7 @@ class GradingCog(commands.Cog):
             del self.ungradedSubmissions[uuid]
         ## UNLOCK MUTEX
 
-        userId, teamNumber, problemNumber = await self.submissionDb.PassSubmission(uuid)
+        userId, teamNumber, problemNumber = await self.submissionDb.FailSubmission(uuid)
         user = await roleUtil.GetUserById(self.bot, userId)
 
         await asyncio.gather(
