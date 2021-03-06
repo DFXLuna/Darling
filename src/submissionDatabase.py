@@ -98,7 +98,7 @@ class submissionDatabase:
         async with self.mutex:
             self.logger.Log(f'SubmissionAlreadyInProgress {teamNumber}, {problemNumber}')
             for submission in self.entries.values():
-                if submission.GetTeamNumber() == teamNumber and submission.GetProblemNumber() == problemNumber and not submission.IsGraded():
+                if submission.GetTeamNumber() == teamNumber and submission.GetProblemNumber() == problemNumber and not submission.IsFail():
                     return True
             return False
 

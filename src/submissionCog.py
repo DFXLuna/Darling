@@ -48,7 +48,7 @@ class SubmissionCog(commands.Cog):
             return
 
         if await self.submissionDb.SubmissionAlreadyInProgress(teamNumber, int(problemNumber)):
-            await ctx.send(f'Team #{teamNumber} has already submitted problem {problemNumber}. Please wait for the judges to judge your submission before resubmitting.')
+            await ctx.send(f'Team #{teamNumber} has already submitted problem {problemNumber}. It has either already passed or is currently in grading')
             return
 
         if not await self.VerifyFileName(ctx.message.attachments[0].filename, int(problemNumber)):
