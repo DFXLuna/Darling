@@ -12,7 +12,7 @@ class ScoringCog(commands.Cog):
         self.registrationDb = registrationDb
         self.bot = bot
         self.logger = logger
-        self.pointValues = [ x for x in range(self.num_problems) ]
+        self.pointValues = [ 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6, 7, 7, 8, 8, 9, 9, 10, 12, 13, 14, 15, 16, 17, 18, 21, 23, 29 ]
 
     @commands.command()
     async def team_score(self, ctx):
